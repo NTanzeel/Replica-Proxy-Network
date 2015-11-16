@@ -1,4 +1,4 @@
-package rpn.gateway.net.handlers;
+package rpn.gateway.handlers;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;

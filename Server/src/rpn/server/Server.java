@@ -1,6 +1,7 @@
-package rpn.gateway;
+package rpn.server;
 
 import io.netty.bootstrap.ServerBootstrap;
+
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -8,13 +9,15 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import rpn.gateway.net.handlers.GatewayChannelHandler;
+import rpn.server.net.decoder.Decoder;
+import rpn.server.net.encoder.Encoder;
+import rpn.server.net.handler.ServerChannelHandler;
 
-public class Gateway {
+public class Server {
 
-    private final int port;
+    private int port;
 
-    public Gateway(int port) {
+    public Server(int port) {
         this.port = port;
     }
 
@@ -28,7 +31,9 @@ public class Gateway {
                     .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast("handler", new GatewayChannelHandler());
+                            ch.pipeline().addLast("encoder", new Encoder());
+                            ch.pipeline().addLast("decoder", new Decoder());
+                            ch.pipeline().addLast("handler", new ServerChannelHandler());
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)          // (5)
@@ -54,6 +59,6 @@ public class Gateway {
             port = Integer.parseInt(args[0]);
         }
 
-        new Gateway(port).run();
+        new Server(port).run();
     }
 }
