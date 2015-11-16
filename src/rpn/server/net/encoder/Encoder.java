@@ -3,7 +3,7 @@ package rpn.server.net.encoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import rpn.server.Message;
+import rpn.server.net.Message;
 
 public class Encoder extends MessageToByteEncoder<Message> {
 

@@ -9,6 +9,12 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.util.CharsetUtil;
+import rpn.server.net.decoder.Decoder;
+import rpn.server.net.encoder.Encoder;
+import rpn.server.net.handler.ServerChannelHandler;
 
 public class Server {
 
@@ -28,7 +34,9 @@ public class Server {
                     .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new ServerChannelHandler());
+                            ch.pipeline().addLast("encoder", new Encoder());
+                            ch.pipeline().addLast("decoder", new Decoder());
+                            ch.pipeline().addLast("handler", new ServerChannelHandler());
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)          // (5)

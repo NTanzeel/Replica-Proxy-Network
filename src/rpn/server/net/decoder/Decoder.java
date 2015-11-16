@@ -3,7 +3,7 @@ package rpn.server.net.decoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import rpn.server.Message;
+import rpn.server.net.Message;
 
 import java.util.List;
 

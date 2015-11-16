@@ -6,14 +6,19 @@ public class Client {
 
     private int id;
 
-    private String ip;
-
     private Channel channel;
 
-    public Client(int id, String ip, Channel channel) {
+    public Client(int id, Channel channel) {
         this.id = id;
-        this.ip = ip;
         this.channel = channel;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public Channel getChannel() {
+        return channel;
     }
 
 }
