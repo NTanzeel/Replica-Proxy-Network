@@ -1,8 +1,10 @@
 package rpn.client;
 
 import java.io.DataInputStream;
-import java.io.PrintWriter;
+import java.io.DataOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
 public class Client {
@@ -36,12 +38,21 @@ public class Client {
 
     public void connect() {
         try {
-            Socket socket = new Socket("0.0.0.0", 43594);
 
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            Socket socket = new Socket(ip, port);
+
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
             DataInputStream in = new DataInputStream(socket.getInputStream());
 
+            out.writeInt(0);
+
+            String ipAddress = InetAddress.getLocalHost().getHostAddress();
+            for (String s : ipAddress.split("\\.")) {
+                out.writeInt(Integer.parseInt(s));
+            }
+
+            out.flush();
 
             int response = in.readInt();
 
@@ -63,7 +74,7 @@ public class Client {
     }
 
     public static void main(String args[]) {
-
+        new Client("0.0.0.0", 43590).connect();
     }
 
 }
