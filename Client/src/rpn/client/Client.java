@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -15,7 +14,7 @@ public class Client {
     private String ip;
     private int port;
     private Socket socket;
-    private PrintWriter out;
+    private DataOutputStream out;
     private DataInputStream in;
     private Scanner reader = new Scanner(System.in);
 
@@ -45,18 +44,9 @@ public class Client {
 
     public void connect() {
         try {
-
-<<<<<<< HEAD
             socket = new Socket(ip, port);
-=======
-            Socket socket = new Socket(ip, port);
 
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
->>>>>>> 7f4d4c7943555b5bda94ac35dae2a78dbf5d29bc
-
-            out = new PrintWriter(socket.getOutputStream(), true);
-
-<<<<<<< HEAD
+            out = new DataOutputStream(socket.getOutputStream());
             in = new DataInputStream(socket.getInputStream());
 
             /**
@@ -64,10 +54,7 @@ public class Client {
              * 0 is client
              * 1 is server
              */
-            out.write(0);
-=======
             out.writeInt(0);
->>>>>>> 7f4d4c7943555b5bda94ac35dae2a78dbf5d29bc
 
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             for (String s : ipAddress.split("\\.")) {
@@ -76,26 +63,39 @@ public class Client {
 
             out.flush();
 
-<<<<<<< HEAD
-            if (response == -1) {
-                System.out.println("Unable to connect to gateway server, limit reached.");
-                socket.close();
-            } else {
-                System.out.println("Connected to gateway server with ID: " + response);
-            }
-=======
             int response = in.readInt();
             int statusCode = in.readInt();
 
-            System.out.println("Response: " + response + ", Status: " + statusCode);
->>>>>>> 7f4d4c7943555b5bda94ac35dae2a78dbf5d29bc
-
-            while (true) {
-
+            if (response == -1) {
+                handleError(statusCode);
+            } else {
+                System.out.println("Successfully connected to server.");
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
+    }
+
+    private void handleError(int errorCode) {
+        switch (errorCode) {
+            case 1:
+                System.out.println("Unable to connect to server, client limit reached.");
+                break;
+        }
+    }
+
+    private boolean closeConnection() {
+        if (socket.isConnected()) {
+            try {
+                socket.close();
+            } catch (Exception e) {
+                System.out.println("Error closing connection");
+            }
+        }
+
+        return socket.isClosed();
     }
 
     public void initialise() {
@@ -162,13 +162,8 @@ public class Client {
 
 
     public static void main(String args[]) {
-<<<<<<< HEAD
         Client client = new Client("", 0);
         client.initialise();
-
-=======
-        new Client("0.0.0.0", 43590).connect();
->>>>>>> 7f4d4c7943555b5bda94ac35dae2a78dbf5d29bc
     }
 
 }
