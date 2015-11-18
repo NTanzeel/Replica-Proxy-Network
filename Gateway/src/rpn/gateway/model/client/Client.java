@@ -1,4 +1,4 @@
-package rpn.gateway.client;
+package rpn.gateway.model.client;
 
 import io.netty.channel.Channel;
 
@@ -8,9 +8,12 @@ public class Client {
 
     private Channel channel;
 
-    public Client(int id, Channel channel) {
+    private String host;
+
+    public Client(int id, Channel channel, String hos) {
         this.id = id;
         this.channel = channel;
+        this.host = hos;
     }
 
     public int getId() {
@@ -19,6 +22,10 @@ public class Client {
 
     public Channel getChannel() {
         return channel;
+    }
+
+    public String getHost() {
+        return host;
     }
 
 }

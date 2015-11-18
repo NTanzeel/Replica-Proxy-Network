@@ -1,7 +1,6 @@
-package rpn.gateway.client;
+package rpn.gateway.model.client;
 
 import io.netty.channel.Channel;
-import rpn.gateway.Settings;
 
 public class ClientHandler {
 
@@ -11,7 +10,7 @@ public class ClientHandler {
         return instance;
     }
 
-    private Client[] clients = new Client[Settings.NO_OF_CLIENTS];
+    private Client[] clients = new Client[10];
 
     public boolean exists(int id) {
         return clients[id] != null;
@@ -34,13 +33,13 @@ public class ClientHandler {
         return id;
     }
 
-    public Client registerClient(Channel channel) {
+    public Client registerClient(Channel channel, String host) {
         int id = getId();
 
         if (id == -1)
             return null;
 
-        clients[id] = new Client(id, channel);
+        clients[id] = new Client(id, channel, host);
 
         return clients[id];
     }

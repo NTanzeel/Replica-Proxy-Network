@@ -1,8 +1,10 @@
 package rpn.client;
 
 import java.io.DataInputStream;
-import java.io.PrintWriter;
+import java.io.DataOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -44,10 +46,17 @@ public class Client {
     public void connect() {
         try {
 
+<<<<<<< HEAD
             socket = new Socket(ip, port);
+=======
+            Socket socket = new Socket(ip, port);
+
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+>>>>>>> 7f4d4c7943555b5bda94ac35dae2a78dbf5d29bc
 
             out = new PrintWriter(socket.getOutputStream(), true);
 
+<<<<<<< HEAD
             in = new DataInputStream(socket.getInputStream());
 
             /**
@@ -56,17 +65,30 @@ public class Client {
              * 1 is server
              */
             out.write(0);
+=======
+            out.writeInt(0);
+>>>>>>> 7f4d4c7943555b5bda94ac35dae2a78dbf5d29bc
 
-            int response = in.readInt();
+            String ipAddress = InetAddress.getLocalHost().getHostAddress();
+            for (String s : ipAddress.split("\\.")) {
+                out.writeInt(Integer.parseInt(s));
+            }
 
-            System.out.println("Reached.");
+            out.flush();
 
+<<<<<<< HEAD
             if (response == -1) {
                 System.out.println("Unable to connect to gateway server, limit reached.");
                 socket.close();
             } else {
                 System.out.println("Connected to gateway server with ID: " + response);
             }
+=======
+            int response = in.readInt();
+            int statusCode = in.readInt();
+
+            System.out.println("Response: " + response + ", Status: " + statusCode);
+>>>>>>> 7f4d4c7943555b5bda94ac35dae2a78dbf5d29bc
 
             while (true) {
 
@@ -140,9 +162,13 @@ public class Client {
 
 
     public static void main(String args[]) {
+<<<<<<< HEAD
         Client client = new Client("", 0);
         client.initialise();
 
+=======
+        new Client("0.0.0.0", 43590).connect();
+>>>>>>> 7f4d4c7943555b5bda94ac35dae2a78dbf5d29bc
     }
 
 }
