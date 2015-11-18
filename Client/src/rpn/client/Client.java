@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class Client {
 
@@ -11,10 +12,16 @@ public class Client {
     private HashMap<String,Integer> stocks = new HashMap<String,Integer>();
     private String ip;
     private int port;
+    private Socket socket;
+    private PrintWriter out;
+    private DataInputStream in;
+    private Scanner reader = new Scanner(System.in);
 
     public Client(String ip, int port) {
+        // ip and port of Gateway
         this.ip = ip;
         this.port = port;
+        //connect();
     }
 
     public double getBalance() {
@@ -36,22 +43,29 @@ public class Client {
 
     public void connect() {
         try {
-            Socket socket = new Socket("0.0.0.0", 43594);
 
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            socket = new Socket(ip, port);
 
-            DataInputStream in = new DataInputStream(socket.getInputStream());
+            out = new PrintWriter(socket.getOutputStream(), true);
 
+            in = new DataInputStream(socket.getInputStream());
+
+            /**
+             * 0/1 to indicate boolean
+             * 0 is client
+             * 1 is server
+             */
+            out.write(0);
 
             int response = in.readInt();
 
             System.out.println("Reached.");
 
             if (response == -1) {
-                System.out.println("Unable to connect to server, limit reached.");
+                System.out.println("Unable to connect to gateway server, limit reached.");
                 socket.close();
             } else {
-                System.out.println("Connected to server with ID: " + response);
+                System.out.println("Connected to gateway server with ID: " + response);
             }
 
             while (true) {
@@ -62,7 +76,72 @@ public class Client {
         }
     }
 
+    public void initialise() {
+
+        printConsole();
+        Boolean goodInput = false;
+
+        while(!goodInput) {
+
+            char op = reader.nextLine().charAt(0);
+
+            goodInput = true;
+
+            switch (op) {
+                case 'a':
+                    buyStock();
+                    break;
+                case 'b':
+                    sellStock();
+                    break;
+                case 'c':
+                    getBalance();
+                    break;
+                case 'q':
+                    break;
+                default:
+                    goodInput = !goodInput;
+                    System.out.println("Invalid Option");
+                    break;
+            }
+        }
+
+    }
+
+    public void buyStock() {
+        printBuyConsole();
+    }
+
+    public void sellStock() {
+
+    }
+
+    public void printConsole() {
+
+        System.out.println("|⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻ STOCK  MARKET ⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻|");
+        System.out.println("|                                     |");
+        System.out.println("|~~~~~~~~~~~ CHOOSE OPTION ~~~~~~~~~~~|");
+        System.out.println("|                                     |");
+        System.out.println("|  a) Buy Stock                       |");
+        System.out.println("|  b) Sell Stock                      |");
+        System.out.println("|  c) Check Balance                   |");
+        System.out.println("|  q) Quit                            |");
+        System.out.println("|_____________________________________|");
+        System.out.println("");
+        System.out.print("Option: ");
+
+    }
+
+    public void printBuyConsole() {
+       // Get stocks from server
+        // ask user to enter name and nominal
+    }
+
+
+
     public static void main(String args[]) {
+        Client client = new Client("", 0);
+        client.initialise();
 
     }
 
