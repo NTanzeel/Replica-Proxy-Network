@@ -22,7 +22,7 @@ public class Client {
         // ip and port of Gateway
         this.ip = ip;
         this.port = port;
-        //connect();
+        connect();
     }
 
     public double getBalance() {
@@ -66,11 +66,18 @@ public class Client {
             int response = in.readInt();
             int statusCode = in.readInt();
 
-            if (response == -1) {
+            if (response == 0) {
                 handleError(statusCode);
             } else {
+                System.out.println("Response code: " + response);
+                System.out.println("Status code: " + statusCode);
                 System.out.println("Successfully connected to server.");
             }
+
+            while(true){
+
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -131,7 +138,14 @@ public class Client {
     }
 
     public void buyStock() {
+        getStocksFromMarket();
         printBuyConsole();
+    }
+
+
+
+    private void getStocksFromMarket() {
+
     }
 
     public void sellStock() {
@@ -153,7 +167,8 @@ public class Client {
         System.out.print("Option: ");
 
     }
-
+     
+    // 
     public void printBuyConsole() {
        // Get stocks from server
         // ask user to enter name and nominal
@@ -162,7 +177,7 @@ public class Client {
 
 
     public static void main(String args[]) {
-        Client client = new Client("", 0);
+        Client client = new Client("192.168.0.23", 43590);
         client.initialise();
     }
 
