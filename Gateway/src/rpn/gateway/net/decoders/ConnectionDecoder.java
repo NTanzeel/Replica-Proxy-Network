@@ -42,6 +42,7 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
      */
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        System.out.println(in.readableBytes());
         switch (state) {
             case Initial:
                     initializeConnection(in);

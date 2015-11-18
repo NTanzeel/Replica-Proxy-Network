@@ -4,6 +4,8 @@ import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import rpn.gateway.model.connection.Connection;
 import rpn.gateway.model.connection.ConnectionHandler;
+import rpn.gateway.net.packets.Packet;
+import rpn.gateway.net.packets.PacketHandler;
 
 public class GatewayChannelHandler extends ChannelHandlerAdapter {
 
@@ -23,6 +25,8 @@ public class GatewayChannelHandler extends ChannelHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof Connection) {
             this.connection = (Connection) msg;
+        } else if (msg instanceof Packet) {
+            PacketHandler.getInstance().queue((Packet) msg);
         }
     }
 

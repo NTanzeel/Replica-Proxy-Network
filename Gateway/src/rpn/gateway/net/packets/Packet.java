@@ -2,48 +2,56 @@ package rpn.gateway.net.packets;
 
 import io.netty.buffer.ByteBuf;
 import rpn.gateway.model.connection.Connection;
-import rpn.gateway.model.connection.ConnectionHandler;
 
 public class Packet {
 
+
+    private int opCode;
+
+    private int size;
+
+    private ByteBuf payload;
+
     private Connection sender;
 
-    private ByteBuf buffer;
-
-    private int recipientId;
-
-    public Packet(Connection sender, ByteBuf buffer) {
+    public Packet(int opCode, int size, ByteBuf payload, Connection sender) {
+        this.opCode = opCode;
+        this.size = size;
+        this.payload = payload;
         this.sender = sender;
-        this.buffer = buffer;
+    }
 
-        if (this.sender.getAttribute("type").equals("CLIENT")) {
-            this.recipientId = buffer.readInt();
-        } else
-            this.recipientId = 0;
+    public int getOpCode() {
+        return opCode;
+    }
+
+    public int getSize() {
+        return size;
     }
 
     public Connection getSender() {
         return sender;
     }
 
-    public Connection getRecipient() {
-        if (this.sender.getAttribute("type").equals("CLIENT")) {
-            return ConnectionHandler.getInstance().getClient(recipientId);
-        } else {
-            return ConnectionHandler.getInstance().getServer(recipientId);
-        }
+    public int readByte() {
+        return payload.readByte();
     }
+
     public int readInt() {
-        return buffer.readInt();
+        return payload.readInt();
     }
 
     public String readString() {
         String s = "";
 
-        for (char c = (char) buffer.readByte(); c != '\n' && buffer.isReadable(); c = (char) buffer.readByte()) {
+        for (char c = (char) payload.readByte(); c != '\n' && payload.isReadable(); c = (char) payload.readByte()) {
             s += c;
         }
 
         return s;
+    }
+
+    public ByteBuf getPayload() {
+        return payload;
     }
 }

@@ -13,7 +13,7 @@ public class ConnectionHandler {
 
     private int limit;
 
-    private int noOfClients;
+    private int noOfClients = 0;
 
     private Connection[] clients;
 
