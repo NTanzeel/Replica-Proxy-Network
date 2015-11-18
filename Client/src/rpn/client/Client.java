@@ -55,15 +55,9 @@ public class Client {
             out.flush();
 
             int response = in.readInt();
+            int statusCode = in.readInt();
 
-            System.out.println("Reached.");
-
-            if (response == -1) {
-                System.out.println("Unable to connect to server, limit reached.");
-                socket.close();
-            } else {
-                System.out.println("Connected to server with ID: " + response);
-            }
+            System.out.println("Response: " + response + ", Status: " + statusCode);
 
             while (true) {
 

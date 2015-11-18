@@ -118,17 +118,18 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
         if (in.readableBytes() < 16)
             return null;
 
-        if (ConnectionHandler.getInstance().getNoOfClients() != ConnectionHandler.getInstance().getLimit()) {
-            writeResponse(ctx, 0, 1, true);
-        }
-
         String host = Integer.toString(in.readInt());
         for (int i = 0; i < 3; i++)
             host +=  "." + Integer.toString(in.readInt());
 
-        Connection client = ConnectionHandler.getInstance().register(ctx.channel(), host);
+        Connection client = null;
 
-        writeResponse(ctx, 1, 1, false);
+        try {
+            client = ConnectionHandler.getInstance().register(ctx.channel(), host);
+            writeResponse(ctx, 1, 1, false);
+        } catch (IndexOutOfBoundsException e) {
+            writeResponse(ctx, 0, 1, true);
+        }
 
         return client;
     }

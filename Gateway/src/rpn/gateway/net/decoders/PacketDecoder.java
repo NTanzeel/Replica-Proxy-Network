@@ -18,10 +18,10 @@ public class PacketDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        int size = in.readInt();
-
-        if (in.readableBytes() >= size) {
-            out.add(new Packet(sender, in.readBytes(size)));
-        }
+//        int size = in.readInt();
+//
+//        if (in.readableBytes() >= size) {
+//            out.add(new Packet(sender, in.readBytes(size)));
+//        }
     }
 }

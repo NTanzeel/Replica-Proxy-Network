@@ -36,7 +36,7 @@ public class ConnectionHandler {
         return servers.size();
     }
 
-    private int getAvailableSlot() {
+    private synchronized int getAvailableSlot() {
         int slot = -1;
 
         for (int i = 0; i < limit; i++) {
@@ -57,11 +57,7 @@ public class ConnectionHandler {
         return clients[id];
     }
 
-    public Connection getServer(int index) {
-        if (index < 0 || index >= servers.size()) {
-            throw new IndexOutOfBoundsException();
-        }
-
+    public Connection getServer(int index) throws IndexOutOfBoundsException {
         return servers.get(index);
     }
 
@@ -77,7 +73,7 @@ public class ConnectionHandler {
         }
     }
 
-    private Connection registerClient(Channel channel, String host) throws IndexOutOfBoundsException {
+    private synchronized Connection registerClient(Channel channel, String host) throws IndexOutOfBoundsException {
         if (getNoOfClients() == getLimit()) {
             throw new IndexOutOfBoundsException();
         }
@@ -96,7 +92,7 @@ public class ConnectionHandler {
         return client;
     }
 
-    private Connection registerServer(Channel channel, String host, int port) {
+    private synchronized Connection registerServer(Channel channel, String host, int port) {
         Connection server = new Connection(channel);
 
         server.setAttribute("host", host);
@@ -117,13 +113,13 @@ public class ConnectionHandler {
         }
     }
 
-    private void deregisterClient(Connection connection) {
+    private synchronized void deregisterClient(Connection connection) {
         int id = (Integer) connection.getAttribute("id");
         clients[id] = null;
         noOfClients--;
     }
 
-    private void deregisterServer(Connection connection) {
+    private synchronized void deregisterServer(Connection connection) {
         if (connection.getAttribute("isPrimary").equals(Boolean.TRUE)) {
             electPrimary();
         }
