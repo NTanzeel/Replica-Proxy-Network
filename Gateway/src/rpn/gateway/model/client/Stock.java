@@ -17,7 +17,7 @@ public class Stock {
         return quantity;
     }
 
-    public int setQuantity(int quantity) {
+    public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
 
@@ -25,7 +25,7 @@ public class Stock {
         return price;
     }
 
-    public int setPrice(int price) {
+    public void setPrice(int price) {
         this.price = price;
     }
 
