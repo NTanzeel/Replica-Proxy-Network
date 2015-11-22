@@ -1,222 +1,79 @@
 package rpn.client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import rpn.client.io.Menu;
+import rpn.client.model.Command;
+import rpn.client.model.Stock;
+import rpn.client.net.Connection;
+
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.util.HashMap;
-import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class Client {
 
+    private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
+
+    private Connection connection;
+
+    private Menu menu = new Menu(Command.list(), Command.QUIT);
+
+    /**
+     * The users balance - Represents the amount of a currency available
+     */
     private double balance;
-    private HashMap<String, Stock> ownedStocks = new HashMap<String, Stock>();
-    private HashMap<String, Stock> availableStocks = new HashMap<String, Stock>();
-    private String ip;
-    private int port;
-    private Socket socket;
-    private DataOutputStream out;
-    private DataInputStream in;
-    private Scanner reader = new Scanner(System.in);
 
-    public Client(String ip, int port) {
-        // ip and port of Gateway
-        this.ip = ip;
-        this.port = port;
-        connect();
+    private HashMap<String, Stock> ownedStocks = new HashMap<>();
+
+    public Client(String host, int port) throws IOException {
+        this.connection = new Connection(host, port);
     }
 
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
+    private void updateBalance(double balance) {
         this.balance += balance;
     }
 
-    public HashMap<String, Stock> getStocks() {
-        return ownedStocks;
+    private void updateStock(Stock stock) {
+        if (ownedStocks.containsKey(stock.getName())) {
+            stock.setQuantity(stock.getQuantity() + ownedStocks.get(stock.getName()).getQuantity());
+        }
+
+        ownedStocks.put(stock.getName(), stock);
     }
 
-    public void addStocks(String stockName, int quantity) {
-        Stock stock = ownedStocks.get(stockName);
-        stock.setQuantity(stock.getQuantity() + quantity);
+    public void run() throws IOException {
+//        this.connection.init();
+
+        this.runDisplayLoop();
+
+        this.connection.close();
     }
 
-    public void connect() {
-        try {
-            socket = new Socket(ip, port);
-
-            out = new DataOutputStream(socket.getOutputStream());
-            in = new DataInputStream(socket.getInputStream());
-
-            /**
-             * 0/1 to indicate boolean
-             * 0 is client
-             * 1 is server
-             */
-            out.writeInt(0);
-
-            String ipAddress = InetAddress.getLocalHost().getHostAddress();
-            for (String s : ipAddress.split("\\.")) {
-                out.writeInt(Integer.parseInt(s));
-            }
-
-            out.flush();
-
-            int response = in.readInt();
-            int statusCode = in.readInt();
-
-            if (response == 0) {
-                handleError(statusCode);
-            } else {
-                System.out.println("Response code: " + response);
-                System.out.println("Status code: " + statusCode);
-                System.out.println("Successfully connected to server.");
-            }
-
-            while(true){
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            // closeConnection();
+    private void runDisplayLoop() {
+        Command choice;
+        while (!menu.getTerminator().equals(choice = menu.getMainChoice())) {
+            handleUserChoice(choice);
         }
     }
 
-    private void handleError(int errorCode) {
-        switch (errorCode) {
-            case 1:
-                System.out.println("Unable to connect to server, client limit reached.");
+    private void handleUserChoice(Command command) {
+        switch (command) {
+            case BUY:
+                buyStock(menu.getStockName(), menu.getQuantity());
+                break;
+            case SELL:
+                sellStock(menu.getStockName(), menu.getQuantity());
+                break;
+            case REFRESH:
+                viewStockList();
+                break;
+            case BALANCE:
+                printBalance();
+                break;
+            default:
+                System.out.println("Invalid Option");
                 break;
         }
     }
-
-    private boolean closeConnection() {
-        if (socket.isConnected()) {
-            try {
-                socket.close();
-            } catch (Exception e) {
-                System.out.println("Error closing connection");
-            }
-        }
-
-        return socket.isClosed();
-    }
-
-    public void initialise() {
-
-        printConsole();
-        boolean goodInput = false;
-
-        while(!goodInput) {
-
-            char op = reader.nextLine().charAt(0);
-
-            goodInput = true;
-
-            switch (op) {
-                case 'a':
-                    buyStock();
-                    break;
-                case 'b':
-                    sellStock();
-                    break;
-                case 'c':
-                    getBalance();
-                    break;
-                case 'q':
-                    break;
-                default:
-                    goodInput = !goodInput;
-                    System.out.println("Invalid Option");
-                    break;
-            }
-        }
-
-    }
-
-    /**
-     * Request and output available stocks
-     * Ask to enter valid name (a valid key in HashMap)
-     * Ask to enter valid, afforable amount (stored in tuple value in HashMap
-     * Send 0, stock name, and amount to
-     */
-    public void buyStock() {
-        try {
-
-            String stock = "";
-            int amount = 0;
-
-            boolean isValid = false;
-
-            getStocksFromMarket();
-            printBuyConsole();
-
-            while (!isValid) {
-
-                System.out.print("Please enter a stock name: ");
-                stock = reader.nextLine();
-                System.out.print("Please enter an amount: ");
-                amount = reader.nextInt();
-                isValid = isValid(stock, amount);
-
-            }
-
-            out.writeBytes("1," + stock + "," + amount + ";");
-            out.flush();
-
-            while (in.available() < 4) {}
-
-            int success = in.readInt();
-
-            while (in.available() < 4) {}
-
-            int response = in.readInt();
-
-            if(success == 1) {
-                addStocks(stock, amount);
-                setBalance(amount*availableStocks.get(stock).getPrice()*-1);
-            } else {
-
-                switch(response) {
-                    case 2:
-                        System.out.println("Not enough " + stock + " stocks available. Please resubmit.");
-                        break;
-                    case 3:
-                        System.out.println("Invalid Option");
-                        break;
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public boolean isValid(String stock, int amount) {
-
-        if(!availableStocks.containsKey(stock)) {
-            System.out.println("Invalid stock name, please resubmit");
-            return false;
-        } else if (availableStocks.get(stock).getQuantity() < amount || amount <= 0) {
-            System.out.println("Invalid quantity, please resubmit");
-            return false;
-        } else if (amount * availableStocks.get(stock).getPrice() > balance) {
-            System.out.println("You cannot afford" + amount + " " + stock + " stocks");
-            System.out.println("The maximum number you can afford with £" + balance
-                    + " is " + balance/availableStocks.get(stock).getPrice());
-            return false;
-        } else {
-            return true;
-        }
-
-    }
-
 
     /**
      * Requests formatted data of available stocks
@@ -224,98 +81,165 @@ public class Client {
      * Format: name,quantity,price;
      */
 
-    public void getStocksFromMarket() {
-
-        int length = 0;
+    public HashMap<String, Stock> getStocksFromMarket() {
+        HashMap<String, Stock> stocks = new HashMap<>();
 
         try {
-            out.writeInt(-1);
-            out.flush();
+            connection.getOutputStream().writeInt(Command.REFRESH.getValue());
+            connection.getOutputStream().flush();
 
-            while (in.available() < 4) {
+            byte[] buffer = new byte[connection.getInputStream().readInt()];
+            connection.getInputStream().readFully(buffer);
 
+            String[] stockArray = (new String(buffer, "UTF-8")).split(";");
+
+            for (String stockDetails : stockArray) {
+                String stockSplit[] = stockDetails.split(",");
+                Stock stock = new Stock(stockSplit[0], Integer.parseInt(stockSplit[1]), Integer.parseInt(stockSplit[2]));
+                stocks.put(stockSplit[0], stock);
             }
-
-            if (in.available() == 4) {
-                length = in.readInt();
-            }
-
-            while (in.available() < length) {
-
-            }
-
-            byte[] buf = new byte[length];
-            in.read(buf);
-
-            String[] decoded = (new String(buf, "UTF-8")).split(";");
-
-            for(int i=0; i<decoded.length; i++) {
-
-                String[] split = decoded[i].split(",");
-                if(availableStocks.containsKey(split[0])) {
-                    availableStocks.get(split[0]).setQuantity(Integer.parseInt(split[1]));
-                    availableStocks.get(split[0]).setQuantity(Integer.parseInt(split[2]));
-                } else {
-                    Stock stock = new Stock(Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-                    availableStocks.put(split[0],stock);
-                }
-
-            }
-
-
         } catch (Exception e) {
             System.out.println("Error requesting available stocks");
+            LOGGER.warning(e.getMessage());
         }
+
+        return stocks;
     }
 
-    public void sellStock() {
-
-    }
-
-    public void printConsole() {
-
-        System.out.println("|⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻ STOCK  MARKET ⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻|");
-        System.out.println("|                                     |");
-        System.out.println("|~~~~~~~~~~~ CHOOSE OPTION ~~~~~~~~~~~|");
-        System.out.println("|                                     |");
-        System.out.println("|  a) Buy Stock                       |");
-        System.out.println("|  b) Sell Stock                      |");
-        System.out.println("|  c) Check Balance                   |");
-        System.out.println("|  q) Quit                            |");
-        System.out.println("|_____________________________________|");
-        System.out.println("");
-        System.out.print("Option: ");
+    public boolean canBuy(HashMap<String, Stock> stocks, String stock, int amount) {
+        if(!stocks.containsKey(stock)) {
+            System.out.println("Invalid stock name, please resubmit");
+            return false;
+        } else if (stocks.get(stock).getQuantity() < amount || amount <= 0) {
+            System.out.println("Invalid quantity, please resubmit");
+            return false;
+        } else if (amount * stocks.get(stock).getPrice() > balance) {
+            System.out.println("You cannot afford " + amount + " " + stock + " stocks");
+            System.out.println("The maximum number you can afford with £" + balance
+                    + " is " + balance/stocks.get(stock).getPrice());
+            return false;
+        } else {
+            return true;
+        }
 
     }
 
     /**
-     * Show what stocks available (given by getStocksFromMarket())
+     * Request and output available stocks
+     * Ask to enter valid name (a valid key in HashMap)
+     * Ask to enter valid, affordable amount (stored in tuple value in HashMap
+     * Send 0, stock name, and amount to
      */
-    public void printBuyConsole() {
-        System.out.println("|⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻ BUY STOCK ⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻|");
-        System.out.println("|                                     |");
-        System.out.println("|~~~~~~~~~~~ CHOOSE OPTION ~~~~~~~~~~~|");
-        System.out.println("|                                     |");
-        System.out.println("| Name         Quantity      Price(£) |");
-        printAvailableStocks();
-        System.out.println("|_____________________________________|");
-        System.out.println("");
+    public void buyStock(String name, int quantity) {
+        try {
+            HashMap<String, Stock> stocks = getStocksFromMarket();
+
+            if (!canBuy(stocks, name, quantity))
+                return;
+
+            connection.getOutputStream().writeInt(Command.BUY.getValue());
+            connection.getOutputStream().writeBytes(name + "\n");
+            connection.getOutputStream().writeInt(quantity);
+
+            connection.getOutputStream().flush();
+
+            boolean response = connection.getInputStream().readInt() == 1;
+            int responseCode = connection.getInputStream().readInt();
+
+            if(response) {
+                updateStock(new Stock(name, quantity, stocks.get(name).getPrice()));
+                updateBalance(quantity * stocks.get(name).getPrice() * -1);
+            } else {
+                handleResponse("buyStock", responseCode);
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to buy stock from the market.");
+            LOGGER.warning(e.getMessage());
+        }
+
     }
 
-    public void printAvailableStocks() {
-        for (HashMap.Entry<String,Stock> entry : availableStocks.entrySet()) {
-            System.out.println("  "
-                    + entry.getKey()
-                    + "            "
-                    + entry.getValue() );
+    public boolean canSell(String name, int quantity) {
+        if(!ownedStocks.containsKey(name)) {
+            System.out.println("You do not own any " + name + " stocks, please resubmit");
+            return false;
+        } else if (quantity > ownedStocks.get(name).getQuantity() || quantity <= 0) {
+            System.out.println("You do not own " + quantity + " " + name + "stocks, please resubmit");
+            return false;
+        } else {
+            return true;
         }
     }
 
+    public void sellStock(String name, int quantity) {
+        try {
+            if (!canSell(name, quantity))
+                return;
 
+            connection.getOutputStream().writeInt(Command.SELL.getValue());
+            connection.getOutputStream().writeBytes(name + "\n");
+            connection.getOutputStream().writeInt(quantity);
+
+            connection.getOutputStream().flush();
+
+            boolean response = connection.getInputStream().readInt() == 1;
+            int responseCode = connection.getInputStream().readInt();
+
+            if(response) {
+                updateStock(new Stock(name, quantity * -1, ownedStocks.get(name).getPrice()));
+                updateBalance(quantity * ownedStocks.get(name).getPrice());
+            } else {
+                handleResponse("sellStock", responseCode);
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to sell stock from the market.");
+            LOGGER.warning(e.getMessage());
+        }
+    }
+
+    public void viewStockList() {
+        HashMap<String, Stock> stocks = getStocksFromMarket();
+
+        System.out.println("|⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻ STOCK  MARKET ⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻|");
+        System.out.println("|                                     |");
+        System.out.println("|~~~~~~~~~~~~ Stock  List ~~~~~~~~~~~~|");
+        System.out.println("|                                     |");
+        System.out.println("| Name      Quantity         Price(£) |");
+        for (Stock stock : stocks.values()) {
+            System.out.println(
+                    "| " + stock.getName() +
+                    "\t\t\t" + stock.getQuantity() +
+                    "\t\t\t " + stock.getPrice()
+            );
+        }
+        System.out.println("|_____________________________________|\n");
+    }
+
+    public void printBalance() {
+        System.out.println("Your Balance: " + balance + "\n");
+    }
+
+    private void handleResponse(String method, int responseCode) {
+        switch (method + ":" + responseCode) {
+            case "buyStock:2":
+                System.out.println("Not enough stocks available. Please resubmit.");
+                break;
+            case "sellStock:2":
+                System.out.println("You do not have enough stocks to sell, please try again.");
+                break;
+            case "buyStock:3":
+            case "sellStock:3":
+                System.out.println("Invalid Option");
+                break;
+        }
+    }
 
     public static void main(String args[]) {
-        Client client = new Client("ntanzeel.noip.me", 43590);
-        client.initialise();
+        try {
+            new Client("0.0.0.0", 43590).run();
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
+        }
     }
 
 }
