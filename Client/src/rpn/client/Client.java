@@ -10,7 +10,8 @@ import java.util.Scanner;
 public class Client {
 
     private double balance;
-    private HashMap<String,Integer> stocks = new HashMap<String,Integer>();
+    private HashMap<String,Integer> ownedStocks = new HashMap<String,Integer>();
+    private HashMap<String,Integer> availableStocks = new HashMap<String,Integer>();
     private String ip;
     private int port;
     private Socket socket;
@@ -34,12 +35,12 @@ public class Client {
     }
 
     public HashMap<String,Integer> getStocks() {
-        return stocks;
+        return ownedStocks;
     }
 
     public void setStocks(String stockName, int quantity) {
-        int initialQuantity = stocks.get(stockName);
-        stocks.put(stockName, initialQuantity+quantity);
+        int initialQuantity = ownedStocks.get(stockName);
+        ownedStocks.put(stockName, initialQuantity+quantity);
     }
 
     public void connect() {
@@ -137,15 +138,60 @@ public class Client {
 
     }
 
+    /**
+     * Request and output available stocks
+     * Ask to enter valid name (a valid key in HashMap)
+     * Ask to enter valid, afforable amount (stored in tuple value in HashMap
+     * Send 1, stock name, and amount to
+     */
     public void buyStock() {
         getStocksFromMarket();
         printBuyConsole();
     }
 
 
+    /**
+     * Requests formatted data of available stocks
+     * Covert these into a Hashmap of available stocks
+     */
 
-    private void getStocksFromMarket() {
+    public void getStocksFromMarket() {
 
+        int length = 0;
+
+        try {
+            out.writeInt(-1);
+            out.flush();
+
+            while (in.available() < 4) {
+
+            }
+
+            if (in.available() == 4) {
+                length = in.readInt();
+            }
+
+            while (in.available() < length) {
+
+            }
+
+            if (in.available() == length) {
+
+                byte[] buf = new byte[length];
+                in.read(buf);
+
+                String[] decoded = (new String(buf, "UTF-8")).split(";");
+
+                for(int i=0; i<decoded.length; i++) {
+                    String[] split = decoded[i].split(",");
+                    availableStocks.put(split[0],Integer.parseInt(split[1]));
+                }
+
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error requesting available stocks");
+        }
     }
 
     public void sellStock() {
@@ -167,11 +213,29 @@ public class Client {
         System.out.print("Option: ");
 
     }
-     
-    // 
+
+    /**
+     * Show what stocks available (given by getStocksFromMarket())
+     *
+      */
     public void printBuyConsole() {
-       // Get stocks from server
-        // ask user to enter name and nominal
+        System.out.println("|⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻ BUY STOCK ⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻|");
+        System.out.println("|                                     |");
+        System.out.println("|~~~~~~~~~~~ CHOOSE OPTION ~~~~~~~~~~~|");
+        System.out.println("|                                     |");
+        System.out.println("|        Name             Quantity    |");
+        printAvailableStocks();
+        System.out.println("|_____________________________________|");
+        System.out.println("");
+    }
+
+    public void printAvailableStocks() {
+        for (HashMap.Entry<String,Integer> entry : availableStocks.entrySet()) {
+            System.out.println("         "
+                    + entry.getKey()
+                    + "             "
+                    + entry.getValue() );
+        }
     }
 
 
