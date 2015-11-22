@@ -1,4 +1,4 @@
-package rpn.gateway.model.client;
+package rpn.server.service;
 
 /**
  * Created by jordan on 22/11/2015.
@@ -28,5 +28,4 @@ public class Stock {
     public void setPrice(int price) {
         this.price = price;
     }
-
 }
