@@ -26,9 +26,9 @@ public class Incoming extends PacketProcessor {
 
         packetSize += 4;
 
-        String ip = (String )packet.getSender().getAttribute("host");
+        String host = (String )packet.getSender().getAttribute("host");
 
-        for (String s : ip.split("\\.")) {
+        for (String s : host.split("\\.")) {
             out.writeInt(Integer.parseInt(s));
         }
 

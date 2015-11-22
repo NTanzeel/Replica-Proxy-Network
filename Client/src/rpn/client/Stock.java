@@ -1,4 +1,4 @@
-package rpn.gateway.model.client;
+package rpn.client;
 
 /**
  * Created by jordan on 22/11/2015.
