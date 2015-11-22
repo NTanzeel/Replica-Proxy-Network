@@ -1,11 +1,9 @@
 package rpn.server.service;
 
 import java.util.HashMap;
-import java.net.Socket;
 
 public class Service {
     private HashMap<String, Stock> stocks = new HashMap<String, Stock>();
-    private Socket socket;
 
     public Service(){
         initialiseMarket();
