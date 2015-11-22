@@ -1,23 +1,17 @@
 package rpn.server.service;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class Service {
     private HashMap<String, Stock> stocks = new HashMap<String, Stock>();
 
     public Service(){
-        initaliseMarket();
+        initialiseMarket();
     }
 
     //Populate market with initial stock prices and quantities
-    public void initaliseMarket(){
+    public void initialiseMarket(){
         Stock google = new Stock(100, 7);
         Stock twitter = new Stock(70, 6);
         Stock apple = new Stock(40, 10);
@@ -39,16 +33,21 @@ public class Service {
         return stockString;
     }
 
-    public void processRequest(int code, String stock, int quantity){
+    public int processRequest(int code, String stock, int quantity){
         int currentQuantity = stocks.get(stock).getQuantity();
 
-        //Request to buy stock
-        if(code == 0){
-            stocks.get(stock).setQuantity(currentQuantity - quantity);
-        }
-        //Request to sell stock
-        else{
-            stocks.get(stock).setQuantity(currentQuantity + quantity);
+        if(quantity > currentQuantity){
+            return 0;
+        } else {
+            //Request to buy stock
+            if (code == 0) {
+                stocks.get(stock).setQuantity(currentQuantity - quantity);
+            }
+            //Request to sell stock
+            else {
+                stocks.get(stock).setQuantity(currentQuantity + quantity);
+            }
+            return  1;
         }
     }
 }
