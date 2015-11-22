@@ -6,6 +6,8 @@ import java.util.HashMap;
 
 public class Connection {
 
+    private boolean isActive = true;
+
     private Channel channel;
 
     private HashMap<String, Object> attributes = new HashMap<>();
@@ -28,6 +30,17 @@ public class Connection {
 
     public Channel getChannel() {
         return channel;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void destruct() {
+        if (channel.isOpen()) {
+            channel.close();
+        }
+        this.isActive = false;
     }
 
 }

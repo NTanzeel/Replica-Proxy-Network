@@ -17,7 +17,12 @@ public class GatewayChannelHandler extends ChannelHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         if (connection != null) {
-            ConnectionHandler.getInstance().deregister(connection);
+            try {
+                ConnectionHandler.getInstance().deregister(connection);
+            } catch (IllegalStateException e) {
+                ConnectionHandler.getInstance().deregisterAll();
+                ctx.channel().parent().close();
+            }
         }
     }
 

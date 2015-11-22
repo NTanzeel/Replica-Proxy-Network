@@ -49,6 +49,10 @@ public class ConnectionHandler {
         return slot;
     }
 
+    public boolean clientExists(int id) {
+        return id > 0 && id < clients.length && clients[id] != null;
+    }
+
     public Connection getClient(int id) throws IndexOutOfBoundsException {
         if (id < 0 || id >= clients.length) {
             throw new IndexOutOfBoundsException();
@@ -105,7 +109,15 @@ public class ConnectionHandler {
         return server;
     }
 
-    public void deregister(Connection connection) {
+    public void deregisterAll() {
+        for (int i = 0; i < clients.length; i++) {
+            if (clients[i] != null) {
+                deregister(clients[i]);
+            }
+        }
+    }
+
+    public void deregister(Connection connection) throws IllegalStateException {
         if (connection.getAttribute("type").equals("CLIENT")) {
             deregisterClient(connection);
         } else {
@@ -113,19 +125,24 @@ public class ConnectionHandler {
         }
     }
 
-    private synchronized void deregisterClient(Connection connection) {
+    private synchronized void deregisterClient(Connection connection) throws IllegalStateException {
         int id = (Integer) connection.getAttribute("id");
+
+        connection.destruct();
         clients[id] = null;
         noOfClients--;
     }
 
-    private synchronized void deregisterServer(Connection connection) {
+    private synchronized void deregisterServer(Connection connection) throws IllegalStateException {
+        connection.destruct();
+        servers.remove(connection);
         if (connection.getAttribute("isPrimary").equals(Boolean.TRUE)) {
             electPrimary();
         }
     }
 
-    private void electPrimary() {
-
+    private void electPrimary() throws IllegalStateException {
+        if (servers.size() == 0)
+            throw new IllegalStateException();
     }
 }

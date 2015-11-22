@@ -16,8 +16,6 @@ public abstract class PacketProcessor implements Runnable {
 
         synchronized (this) {
             added = queue.add(packet);
-
-            System.out.println((isRunning ? "" : "not ") + "running");
             if (added && !isRunning) {
                 new Thread(this).start();
             }
@@ -42,7 +40,7 @@ public abstract class PacketProcessor implements Runnable {
         }
     }
 
-    public abstract void process(Packet packet);
+    public abstract boolean process(Packet packet);
 
     @Override
     public void run() {
