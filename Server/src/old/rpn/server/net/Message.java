@@ -1,4 +1,4 @@
-package rpn.server.net;
+package old.rpn.server.net;
 
 public class Message {
 

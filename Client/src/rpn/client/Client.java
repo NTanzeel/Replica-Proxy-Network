@@ -41,7 +41,7 @@ public class Client {
     }
 
     public void run() throws IOException {
-//        this.connection.init();
+        this.connection.init();
 
         this.runDisplayLoop();
 

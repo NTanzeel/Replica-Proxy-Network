@@ -42,7 +42,6 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
      */
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        System.out.println(in.readableBytes());
         switch (state) {
             case Initial:
                     initializeConnection(in);
@@ -60,7 +59,7 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
      * @param in A buffer containing an in-stream of bytes
      */
     private void initializeConnection(ByteBuf in) {
-        if (in.readableBytes() > 4) {
+        if (in.readableBytes() >= 4) {
             isServer = in.readInt() == 1;
             state = ConnectionState.Pending;
         }
@@ -102,7 +101,27 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
 
         Connection server = ConnectionHandler.getInstance().register(ctx.channel(), host, port);
 
-        writeResponse(ctx, 1, ((Boolean) server.getAttribute("isPrimary")) ? 1 : 0, false);
+        ByteBuf response = ctx.alloc().buffer();
+
+        response.writeInt(1);
+
+        if ((Boolean) server.getAttribute("isPrimary")) {
+            response.writeInt(1);
+
+            String primaryHost = (String) ConnectionHandler.getInstance().getServer(0).getAttribute("host");
+            int primaryPort = (int) ConnectionHandler.getInstance().getServer(0).getAttribute("port");
+
+            for (String s : primaryHost.split("\\.")) {
+                response.writeInt(Integer.parseInt(s));
+            }
+
+            response.writeInt(primaryPort);
+
+        } else response.writeInt(0);
+
+        writeResponse(ctx, response, false);
+
+        // writeResponse(ctx, 1, ((Boolean) server.getAttribute("isPrimary")) ? 1 : 0, false);
 
         return server;
     }
@@ -145,8 +164,12 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
      * @param forceClose Whether the connection should be forcefully closed upon write completion
      */
     private void writeResponse(ChannelHandlerContext ctx, int success, int status, boolean forceClose) {
-        ByteBuf out = ctx.alloc().buffer().writeInt(success).writeInt(status);
-        ChannelFuture channelFuture = ctx.writeAndFlush(out);
+        ByteBuf response = ctx.alloc().buffer().writeInt(success).writeInt(status);
+        writeResponse(ctx, response, forceClose);
+    }
+
+    private void writeResponse(ChannelHandlerContext ctx, ByteBuf response, boolean forceClose) {
+        ChannelFuture channelFuture = ctx.writeAndFlush(response);
         if (forceClose) {
             channelFuture.addListener(new ChannelFutureListener() {
                 public void operationComplete(ChannelFuture future) {

@@ -1,63 +1,75 @@
 package rpn.server;
 
-import io.netty.bootstrap.ServerBootstrap;
+import rpn.server.model.gateway.Gateway;
+import rpn.server.model.primary.Primary;
+import rpn.server.replicaserver.Listener;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import rpn.server.net.decoder.Decoder;
-import rpn.server.net.encoder.Encoder;
-import rpn.server.net.handler.ManualChannelHandler;
-import rpn.server.net.handler.ServerChannelHandler;
+import java.net.InetAddress;
 
 public class Server {
 
-    private int port;
+    private static Server instance;
 
-    public Server(int port) {
-        this.port = port;
+    public static Server getInstance() {
+        return instance;
     }
 
-    public void run() throws Exception {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private Primary primary = null;
+
+    private Listener listener;
+
+    private Gateway gateway;
+
+    public Server(String gatewayHost, int gatewayPort, int serverPort) throws Exception {
+        String serverHost = InetAddress.getLocalHost().getHostAddress();
+
+        this.listener = new Listener(gatewayPort);
+        this.gateway = new Gateway(gatewayHost, gatewayPort, serverHost, serverPort);
+    }
+
+    public boolean isPrimary() {
+        return primary == null;
+    }
+
+    public Primary getPrimary() {
+        return primary;
+    }
+
+    public void setPrimary(Primary primary) {
+        this.primary = primary;
+    }
+
+    public Gateway getGateway() {
+        return gateway;
+    }
+
+    public Listener getListener() {
+        return listener;
+    }
+
+    public void stop() {
+
+    }
+
+    public Server start() {
+        new Thread(gateway).start();
+
+        return this;
+    }
+
+    public static void main(String[] args) {
+        if (args.length < 3) {
+            System.out.println("Please provide the gateway host, gateway port, and a server port.");
+        }
+
+        String gatewayHost = args[0];
+        int gatewayPort = Integer.parseInt(args[1]);
+        int serverPort = Integer.parseInt(args[2]);
+
         try {
-            ServerBootstrap b = new ServerBootstrap(); // (2)
-            b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class) // (3)
-                    .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
-                        @Override
-                        public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast("handler", new ManualChannelHandler());
-                        }
-                    })
-                    .option(ChannelOption.SO_BACKLOG, 128)          // (5)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
-
-            // Bind and start to accept incoming connections.
-            ChannelFuture f = b.bind(port).sync(); // (7)
-
-            // Wait until the server socket is closed.
-            // In this example, this does not happen, but you can do that to gracefully
-            // shut down your server.
-            f.channel().closeFuture().sync();
-        } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
+            instance = new Server(gatewayHost, gatewayPort, serverPort).start();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        int port = 43590;
-
-        if (args.length > 0) {
-            port = Integer.parseInt(args[0]);
-        }
-
-        new Server(port).run();
     }
 }

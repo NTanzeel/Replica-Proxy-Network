@@ -40,10 +40,6 @@ public class Incoming extends PacketProcessor {
 
         packet.getSender().getChannel().writeAndFlush(out);
 
-        System.out.print("{opcode: " + packet.getOpCode());
-        System.out.print(", size: " + packet.getSize());
-        System.out.println(", content: " + packet.readString() + "}");
-
         return true;
     }
 }

@@ -1,9 +1,9 @@
-package rpn.server.net.encoder;
+package old.rpn.server.net.encoder;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import rpn.server.net.Message;
+import old.rpn.server.net.Message;
 
 public class Encoder extends MessageToByteEncoder<Message> {
 
