@@ -1,5 +1,6 @@
 package rpn.gateway.model.connection;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import java.util.ArrayList;
 
@@ -142,7 +143,31 @@ public class ConnectionHandler {
     }
 
     private void electPrimary() throws IllegalStateException {
-        if (servers.size() == 0)
-            throw new IllegalStateException();
+        if (servers.size() == 0){
+            throw new IllegalStateException("No servers are currently online to takeover");
+        }
+            Connection primaryServer = servers.get(0);
+            String primaryIp = (String) primaryServer.getAttribute("host");
+            String primaryPort = (String) primaryServer.getAttribute("port");
+            broadcastPrimary(primaryIp, primaryPort);
+
+    }
+    
+    /**
+     * broadcasts the new alloctated primary to each available online back-up server.
+     * @param ipPrimary
+     * @param primaryPort
+     */
+    private void broadcastPrimary(String ipPrimary, String primaryPort) {
+        for(int i = 1; i < servers.size(); i++){
+            Connection backup = servers.get(i);
+            ByteBuf out = backup.getChannel().alloc().buffer();
+            String[] tempIps = ipPrimary.split(".");
+            for (int pos = 0; i <tempIps.length;i++){
+                out.writeInt(Integer.parseInt(tempIps[pos]));
+            }
+            out.writeInt(Integer.parseInt(primaryPort));
+            backup.getChannel().writeAndFlush(out);
+        }
     }
 }
