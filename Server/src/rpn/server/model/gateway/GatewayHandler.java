@@ -3,6 +3,8 @@ package rpn.server.model.gateway;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import rpn.server.Server;
+import rpn.server.model.primary.Primary;
 
 
 public class GatewayHandler extends ChannelHandlerAdapter {
@@ -32,7 +34,9 @@ public class GatewayHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-
+        if (msg instanceof Primary) {
+            Server.getInstance().setPrimary((Primary) msg);
+        }
     }
 
     @Override

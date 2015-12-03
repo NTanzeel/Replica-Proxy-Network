@@ -20,21 +20,17 @@ public class Incoming extends PacketProcessor {
         ByteBuf out = primary.getChannel().alloc().buffer();
         out.writeInt(packet.getOpCode());
 
-        int packetSize = packet.getSize();
+        int packetSize = packet.getSize() + 20;
+
+        out.writeInt(packetSize);
 
         out.writeInt((Integer) packet.getSender().getAttribute("id"));
 
-        packetSize += 4;
-
-        String host = (String )packet.getSender().getAttribute("host");
+        String host = (String) packet.getSender().getAttribute("host");
 
         for (String s : host.split("\\.")) {
             out.writeInt(Integer.parseInt(s));
         }
-
-        packetSize += 16;
-
-        out.writeInt(packetSize);
 
         out.writeBytes(packet.getPayload());
 

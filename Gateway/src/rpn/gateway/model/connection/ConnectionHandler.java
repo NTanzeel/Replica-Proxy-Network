@@ -146,28 +146,41 @@ public class ConnectionHandler {
         if (servers.size() == 0){
             throw new IllegalStateException("No servers are currently online to takeover");
         }
-            Connection primaryServer = servers.get(0);
-            String primaryIp = (String) primaryServer.getAttribute("host");
-            String primaryPort = (String) primaryServer.getAttribute("port");
-            broadcastPrimary(primaryIp, primaryPort);
 
+        broadcastPrimary(servers.get(0));
     }
     
     /**
-     * broadcasts the new alloctated primary to each available online back-up server.
-     * @param ipPrimary
-     * @param primaryPort
+     * broadcasts the new allocated primary to each available online back-up server.
+     *
+     * @param primary The, new, primary to broadcast.
      */
-    private void broadcastPrimary(String ipPrimary, String primaryPort) {
-        for(int i = 1; i < servers.size(); i++){
-            Connection backup = servers.get(i);
-            ByteBuf out = backup.getChannel().alloc().buffer();
-            String[] tempIps = ipPrimary.split(".");
-            for (int pos = 0; i <tempIps.length;i++){
-                out.writeInt(Integer.parseInt(tempIps[pos]));
-            }
-            out.writeInt(Integer.parseInt(primaryPort));
-            backup.getChannel().writeAndFlush(out);
+    private void broadcastPrimary(Connection primary) {
+        String host = (String) primary.getAttribute("host");
+        int port = (int) primary.getAttribute("port");
+
+        for(int i = 1; i < servers.size(); i++) {
+            sendPrimaryToReplica(servers.get(i), host, port);
         }
+    }
+
+    /**
+     * Sends a "Primary Changed" Packet to a specified replica.
+     *
+     * @param replica The replica to send the packet to.
+     * @param host The host to write as part of the packet.
+     * @param port The port to write as part of the packet.
+     */
+    private void sendPrimaryToReplica(Connection replica, String host, int port) {
+        ByteBuf out = replica.getChannel().alloc().buffer();
+
+        out.writeInt(43590);
+
+        for (String octet : host.split("\\.")) {
+            out.writeInt(Integer.parseInt(octet));
+        }
+
+        out.writeInt(port);
+        replica.getChannel().writeAndFlush(out);
     }
 }

@@ -34,7 +34,9 @@ public class Listener implements Runnable {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-
+                            ch.pipeline()
+                                    .addLast("decoder", new ConnectionDecoder())
+                                    .addLast("handler", new ReplicaChannelHandler());
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
