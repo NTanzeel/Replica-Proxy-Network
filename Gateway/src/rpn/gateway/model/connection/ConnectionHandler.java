@@ -41,9 +41,9 @@ public class ConnectionHandler {
 
 
     /**
-     * Gets the number of available slots on the gateway
+     * Gets an available slot number. An index in the clients array.
      *
-     * @return the number of free slots for a server, -1 means all slots are full.
+     * @return The next available free slot or -1 if there are no free slots.
      */
     private synchronized int getAvailableSlot() {
         int slot = -1;
