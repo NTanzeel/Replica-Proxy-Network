@@ -39,6 +39,12 @@ public class ConnectionHandler {
         return servers.size();
     }
 
+
+    /**
+     * Gets the number of available slots on the gateway
+     *
+     * @return the number of free slots for a server, -1 means all slots are full.
+     */
     private synchronized int getAvailableSlot() {
         int slot = -1;
 
@@ -48,9 +54,9 @@ public class ConnectionHandler {
                 break;
             }
         }
-
         return slot;
     }
+
 
     public boolean clientExists(int id) {
         boolean exists;
@@ -175,11 +181,11 @@ public class ConnectionHandler {
 
         broadcastPrimary(primary);
     }
-    
+
     /**
      * broadcasts the new allocated primary to each available online back-up server.
      *
-     * @param primary The, new, primary to broadcast.
+     * @param primary The new primary to broadcast.
      */
     private void broadcastPrimary(Connection primary) {
         primary.setAttribute("isPrimary", true);
