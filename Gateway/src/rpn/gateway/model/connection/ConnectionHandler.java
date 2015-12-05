@@ -3,10 +3,12 @@ package rpn.gateway.model.connection;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class ConnectionHandler {
 
-    private static final ConnectionHandler instance = new ConnectionHandler(2);
+    public static final ConnectionHandler instance = new ConnectionHandler(2);
 
     public static ConnectionHandler getInstance() {
         return instance;
@@ -16,9 +18,9 @@ public class ConnectionHandler {
 
     private int noOfClients = 0;
 
-    private Connection[] clients;
+    private final Connection[] clients;
 
-    private ArrayList<Connection> servers = new ArrayList<>();
+    private final ArrayList<Connection> servers = new ArrayList<>();
 
     public ConnectionHandler(int limit) {
         this.limit = limit;
@@ -51,7 +53,13 @@ public class ConnectionHandler {
     }
 
     public boolean clientExists(int id) {
-        return id > 0 && id < clients.length && clients[id] != null;
+        boolean exists;
+
+        synchronized (clients) {
+            exists = id >= 0 && id < clients.length && clients[id] != null;
+        }
+
+        return exists;
     }
 
     public Connection getClient(int id) throws IndexOutOfBoundsException {
@@ -59,11 +67,23 @@ public class ConnectionHandler {
             throw new IndexOutOfBoundsException();
         }
 
-        return clients[id];
+        Connection client;
+
+        synchronized (clients) {
+            client = clients[id];
+        }
+
+        return client;
     }
 
     public Connection getServer(int index) throws IndexOutOfBoundsException {
-        return servers.get(index);
+        Connection server;
+
+        synchronized (servers) {
+            server = servers.get(index);
+        }
+
+        return server;
     }
 
     public Connection register(Channel channel, String host) throws IndexOutOfBoundsException {
@@ -91,8 +111,10 @@ public class ConnectionHandler {
         client.setAttribute("host", host);
         client.setAttribute("type", "CLIENT");
 
-        noOfClients++;
-        clients[id] = client;
+        synchronized (clients) {
+            clients[id] = client;
+            noOfClients++;
+        }
 
         return client;
     }
@@ -105,17 +127,11 @@ public class ConnectionHandler {
         server.setAttribute("type", "SERVER");
         server.setAttribute("isPrimary", getNoOfServers() == 0);
 
-        servers.add(server);
+        synchronized (servers) {
+            servers.add(server);
+        }
 
         return server;
-    }
-
-    public void deregisterAll() {
-        for (int i = 0; i < clients.length; i++) {
-            if (clients[i] != null) {
-                deregister(clients[i]);
-            }
-        }
     }
 
     public void deregister(Connection connection) throws IllegalStateException {
@@ -130,13 +146,17 @@ public class ConnectionHandler {
         int id = (Integer) connection.getAttribute("id");
 
         connection.destruct();
-        clients[id] = null;
-        noOfClients--;
+        synchronized (clients) {
+            clients[id] = null;
+            noOfClients--;
+        }
     }
 
     private synchronized void deregisterServer(Connection connection) throws IllegalStateException {
         connection.destruct();
-        servers.remove(connection);
+        synchronized (servers) {
+            servers.remove(connection);
+        }
         if (connection.getAttribute("isPrimary").equals(Boolean.TRUE)) {
             electPrimary();
         }
@@ -147,7 +167,13 @@ public class ConnectionHandler {
             throw new IllegalStateException("No servers are currently online to takeover");
         }
 
-        broadcastPrimary(servers.get(0));
+        Connection primary;
+
+        synchronized (servers) {
+            primary = servers.get(0);
+        }
+
+        broadcastPrimary(primary);
     }
     
     /**
@@ -156,11 +182,20 @@ public class ConnectionHandler {
      * @param primary The, new, primary to broadcast.
      */
     private void broadcastPrimary(Connection primary) {
+        primary.setAttribute("isPrimary", true);
+
         String host = (String) primary.getAttribute("host");
         int port = (int) primary.getAttribute("port");
 
-        for(int i = 1; i < servers.size(); i++) {
-            sendPrimaryToReplica(servers.get(i), host, port);
+
+        Collection<Connection> servers;
+        synchronized (this.servers) {
+            servers = Collections.unmodifiableCollection(this.servers);
+
+        }
+
+        for(Connection server : servers) {
+            sendPrimaryToReplica(server, host, port);
         }
     }
 
@@ -174,13 +209,18 @@ public class ConnectionHandler {
     private void sendPrimaryToReplica(Connection replica, String host, int port) {
         ByteBuf out = replica.getChannel().alloc().buffer();
 
-        out.writeInt(43590);
+        boolean isPrimary = (boolean) replica.getAttribute("isPrimary");
 
-        for (String octet : host.split("\\.")) {
-            out.writeInt(Integer.parseInt(octet));
+        out.writeInt(1);
+        out.writeInt(isPrimary ? 1 : 0);
+
+        if (!isPrimary) {
+            for (String octet : host.split("\\.")) {
+                out.writeInt(Integer.parseInt(octet));
+            }
+
+            out.writeInt(port);
         }
-
-        out.writeInt(port);
         replica.getChannel().writeAndFlush(out);
     }
 }

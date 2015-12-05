@@ -1,4 +1,4 @@
-package rpn.server.model.connection;
+package rpn.server.model.replica;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +26,15 @@ public class ReplicaHandler {
         }
     }
 
-    private Collection<Replica> getReplicas() {
+    public Collection<Integer> getIds() {
+        Collection<Integer> ids;
+        synchronized (this) {
+            ids = Collections.unmodifiableCollection(this.replicas.keySet());
+        }
+        return ids;
+    }
+
+    public Collection<Replica> getReplicas() {
         Collection<Replica> replicas;
         synchronized (this) {
             replicas = Collections.unmodifiableCollection(this.replicas.values());

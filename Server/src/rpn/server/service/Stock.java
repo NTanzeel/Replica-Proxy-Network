@@ -1,16 +1,19 @@
-package old.rpn.server.service;
+package rpn.server.service;
 
-/**
- * Created by jordan on 22/11/2015.
- */
 public class Stock {
 
+    private String name;
     private int quantity;
     private int price;
 
-    public Stock(int quantity, int price) {
+    public Stock(String name, int quantity, int price) {
+        this.name = name;
         this.quantity = quantity;
         this.price = price;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public int getQuantity() {
@@ -28,4 +31,5 @@ public class Stock {
     public void setPrice(int price) {
         this.price = price;
     }
+
 }

@@ -11,6 +11,7 @@ public class Primary extends Client {
 
     @Override
     protected void initialisePipeline(ChannelPipeline pipeline) {
-
+        pipeline.addLast("decoder", new PrimaryRequestDecoder())
+                .addLast("handler", new PrimaryChannelHandler());
     }
 }

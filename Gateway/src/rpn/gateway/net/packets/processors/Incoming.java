@@ -34,7 +34,7 @@ public class Incoming extends PacketProcessor {
 
         out.writeBytes(packet.getPayload());
 
-        packet.getSender().getChannel().writeAndFlush(out);
+        primary.getChannel().writeAndFlush(out);
 
         return true;
     }

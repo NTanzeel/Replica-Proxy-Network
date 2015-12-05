@@ -2,6 +2,7 @@ package rpn.gateway.net.handlers;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import rpn.gateway.Gateway;
 import rpn.gateway.model.connection.Connection;
 import rpn.gateway.model.connection.ConnectionHandler;
 import rpn.gateway.net.packets.Packet;
@@ -20,7 +21,6 @@ public class GatewayChannelHandler extends ChannelHandlerAdapter {
             try {
                 ConnectionHandler.getInstance().deregister(connection);
             } catch (IllegalStateException e) {
-                ConnectionHandler.getInstance().deregisterAll();
                 ctx.channel().parent().close();
             }
         }
@@ -30,8 +30,10 @@ public class GatewayChannelHandler extends ChannelHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof Connection) {
             this.connection = (Connection) msg;
+            Gateway.LOGGER.info("Registered: " + connection.getAttribute("type"));
         } else if (msg instanceof Packet) {
             PacketHandler.getInstance().queue((Packet) msg);
+            Gateway.LOGGER.info("Packet Received " + msg.toString());
         }
     }
 

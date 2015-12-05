@@ -1,8 +1,9 @@
-package old.rpn.server.service;
+package rpn.server.service;
 
 import java.util.HashMap;
 
 public class Service {
+
     /**
      * HashMap of available stocks
      */
@@ -12,69 +13,21 @@ public class Service {
      * Constructor will initialise the Service by populating the stock market
      */
     public Service(){
-        initialiseMarket();
+        this("GOOG,100,7;TWTR,70,6;APPL,40,10;");
+    }
+
+    public Service(String stocks) {
+        initialiseMarket(stocks);
     }
 
     /**
      * Populate market with initial stock prices and quantities
      */
-    public void initialiseMarket(){
-        Stock google = new Stock(100, 7);
-        Stock twitter = new Stock(70, 6);
-        Stock apple = new Stock(40, 10);
-
-        stocks.put("GOOG", google);
-        stocks.put("TWTR", twitter);
-        stocks.put("APPL", apple);
-    }
-
-    /**
-     * Send current stock market status to the client as a byte stream
-     * @return Returns the formatted string of available stocks
-     */
-    public String getStocks(){
-        String stockString = "";
-
-        //Add each map entry to a string formatted as key,quantity, price;...;key,quantity,price;
-        for(HashMap.Entry<String, Stock> entry : stocks.entrySet()){
-            stockString += entry.getKey() + "," + entry.getValue().getQuantity() + "," + entry.getValue().getPrice() + ";";
+    public void initialiseMarket(String stocks){
+        for (String s : stocks.split(";")) {
+            String[] stock = s.split(",");
+            this.stocks.put(stock[0], new Stock(stock[0], Integer.parseInt(stock[1]), Integer.parseInt(stock[2])));
         }
-        return stockString;
-    }
-
-    /**
-     * Method to process the request received from the client
-     *
-     * @param code represents whether the client is buying (0) or selling (1) stock
-     * @param stock represents the name of the stock being bought or sold
-     * @param quantity represents the amount of stock being bought or sold
-     * @return Returns response code representing a successfully processed request or an error
-     */
-    public int processRequest(int code, String stock, int quantity){
-        int status;
-
-        //Check if the requested stock
-        if( stockExists(stock)) {
-            //Depending on request code (buy or sell), update stock amount
-            switch (code) {
-                case 0:
-                    status = buyStock(stock, quantity);
-                    break;
-                case 1:
-                    status = sellStock(stock, quantity);
-                    break;
-                default:
-                    System.out.println("Invalid option");
-                    //Error code 3 represents an invalid option
-                    status = 3;
-                    break;
-            }
-        }
-        else{
-            //Error code 4 represents a non-existant stock
-            status = 4;
-        }
-        return status;
     }
 
     /**
@@ -132,5 +85,21 @@ public class Service {
         stocks.get(stock).setQuantity(stocks.get(stock).getQuantity() - quantity);
 
         return 1;
+    }
+
+
+    public void update(String stocks) {
+        this.stocks.clear();
+        initialiseMarket(stocks);
+    }
+
+    public String toString() {
+        String toString = "";
+
+        for (Stock stock : stocks.values()) {
+            toString += stock.getName() + "," + stock.getQuantity() + "," + stock.getPrice() + ";";
+        }
+
+        return toString;
     }
 }

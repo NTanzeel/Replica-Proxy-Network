@@ -1,10 +1,12 @@
 package rpn.gateway.net.packets.processors;
 
 import io.netty.buffer.ByteBuf;
+import rpn.gateway.Gateway;
 import rpn.gateway.model.connection.Connection;
 import rpn.gateway.model.connection.ConnectionHandler;
 import rpn.gateway.net.packets.Packet;
 
+import java.nio.charset.Charset;
 import java.util.NoSuchElementException;
 
 public class Outgoing extends PacketProcessor {
@@ -19,6 +21,7 @@ public class Outgoing extends PacketProcessor {
             host +=  "." + Integer.toString(packet.getPayload().readInt());
 
         if (ConnectionHandler.getInstance().clientExists(id)) {
+
             try {
                 Connection client = ConnectionHandler.getInstance().getClient(id);
 
@@ -26,7 +29,12 @@ public class Outgoing extends PacketProcessor {
                     throw new NoSuchElementException();
 
                 ByteBuf out = client.getChannel().alloc().buffer();
-                out.writeInt(packet.getOpCode());
+
+                System.out.println(packet.getPayload().readableBytes());
+
+                out.writeInt(packet.getPayload().readableBytes());
+
+                System.out.println(packet.getPayload().toString(Charset.forName("UTF-8")));
 
                 out.writeBytes(packet.getPayload());
 

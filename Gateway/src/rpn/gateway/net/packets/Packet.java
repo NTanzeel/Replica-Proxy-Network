@@ -3,6 +3,8 @@ package rpn.gateway.net.packets;
 import io.netty.buffer.ByteBuf;
 import rpn.gateway.model.connection.Connection;
 
+import java.nio.charset.Charset;
+
 public class Packet {
 
 
@@ -53,5 +55,14 @@ public class Packet {
 
     public ByteBuf getPayload() {
         return payload;
+    }
+
+    @Override
+    public String toString() {
+        return "Packet{" +
+                "opCode=" + opCode +
+                ", size=" + size +
+                ", payload=" + payload.toString(Charset.forName("UTF-8")) +
+                '}';
     }
 }

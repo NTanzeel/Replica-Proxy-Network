@@ -1,19 +1,22 @@
 package rpn.gateway;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import rpn.gateway.net.decoders.ConnectionDecoder;
 import rpn.gateway.net.handlers.GatewayChannelHandler;
 
+import java.util.logging.Logger;
+
 public class Gateway {
 
+    public static final Logger LOGGER = Logger.getLogger(Gateway.class.getName());
+
     private final int port;
+
+    private Channel channel;
 
     public Gateway(int port) {
         this.port = port;
@@ -39,11 +42,17 @@ public class Gateway {
 
             ChannelFuture f = bootstrap.bind(port).sync(); // (7)
 
+            channel = f.channel();
+
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
+    }
+
+    public void stop() {
+        channel.close();
     }
 
     public static void main(String[] args) throws Exception {

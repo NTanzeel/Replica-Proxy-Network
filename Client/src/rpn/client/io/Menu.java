@@ -31,16 +31,28 @@ public class Menu {
         System.out.println("|_____________________________________|\n");
         System.out.print("Option: ");
 
-        return Command.valueOf(scanner.nextInt());
+        try {
+            return Command.valueOf(scanner.nextInt());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String getStockName() {
-        System.out.print("Please enter a stock name: ");
-        return scanner.next();
+        try {
+            System.out.print("Please enter a stock name: ");
+            return scanner.next();
+        } catch (Exception e) {
+            return getStockName();
+        }
     }
 
     public int getQuantity() {
-        System.out.print("Please enter an amount: ");
-        return scanner.nextInt();
+        try {
+            System.out.print("Please enter an amount: ");
+            return scanner.nextInt();
+        } catch (Exception e) {
+            return getQuantity();
+        }
     }
 }

@@ -1,5 +1,7 @@
 package rpn.client.net;
 
+import rpn.client.Client;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -34,7 +36,7 @@ public class Connection {
      */
     private DataOutputStream outputStream = null;
 
-    public Connection(String host, int port) throws UnknownHostException, IOException {
+    public Connection(String host, int port) throws IOException {
         this.host = host;
         this.port = port;
         this.socket = new Socket(host, port);
@@ -47,7 +49,11 @@ public class Connection {
         int response[] = handshake();
 
         if (response[0] == 0) {
-            throw new IOException("Unable to connect to server, client limit reached.");
+            if (response[1] == 1) {
+                throw new IOException("Unable to connect to server, client limit reached.");
+            } else if (response[1] == 2){
+                throw new IOException("Unable to connect to server, connection refused.");
+            }
         }
     }
 
@@ -72,10 +78,6 @@ public class Connection {
         return port;
     }
 
-    public boolean isActive() {
-        return socket.isConnected();
-    }
-
     public DataInputStream getInputStream() {
         return inputStream;
     }
@@ -84,9 +86,11 @@ public class Connection {
         return outputStream;
     }
 
-    public boolean close() throws IOException {
-        if (socket.isConnected()) {
+    public boolean close() {
+        try {
             socket.close();
+        } catch (IOException e) {
+            Client.LOGGER.severe("Error closing the socket.");
         }
 
         return socket.isClosed();

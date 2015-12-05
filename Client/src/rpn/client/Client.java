@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 public class Client {
 
-    private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
+    public static final Logger LOGGER = Logger.getLogger(Client.class.getName());
 
     private Connection connection;
 
@@ -20,7 +20,7 @@ public class Client {
     /**
      * The users balance - Represents the amount of a currency available
      */
-    private double balance;
+    private double balance = 1000;
 
     private HashMap<String, Stock> ownedStocks = new HashMap<>();
 
@@ -86,6 +86,7 @@ public class Client {
 
         try {
             connection.getOutputStream().writeInt(Command.REFRESH.getValue());
+            connection.getOutputStream().writeInt(0);
             connection.getOutputStream().flush();
 
             byte[] buffer = new byte[connection.getInputStream().readInt()];
@@ -98,9 +99,10 @@ public class Client {
                 Stock stock = new Stock(stockSplit[0], Integer.parseInt(stockSplit[1]), Integer.parseInt(stockSplit[2]));
                 stocks.put(stockSplit[0], stock);
             }
+        } catch (IOException e) {
+            handleIOFailure(e);
         } catch (Exception e) {
-            System.out.println("Error requesting available stocks");
-            LOGGER.warning(e.getMessage());
+            LOGGER.severe("Unable to request stocks from the market - " + e.getMessage());
         }
 
         return stocks;
@@ -131,18 +133,20 @@ public class Client {
      * Send 0, stock name, and amount to
      */
     public void buyStock(String name, int quantity) {
+        HashMap<String, Stock> stocks = getStocksFromMarket();
+
+        if (!canBuy(stocks, name, quantity))
+            return;
+
         try {
-            HashMap<String, Stock> stocks = getStocksFromMarket();
-
-            if (!canBuy(stocks, name, quantity))
-                return;
-
             connection.getOutputStream().writeInt(Command.BUY.getValue());
-            connection.getOutputStream().writeBytes(name + "\n");
+            connection.getOutputStream().writeInt(name.length() + 4);
+            connection.getOutputStream().writeBytes(name);
             connection.getOutputStream().writeInt(quantity);
 
             connection.getOutputStream().flush();
 
+            connection.getInputStream().readInt();
             boolean response = connection.getInputStream().readInt() == 1;
             int responseCode = connection.getInputStream().readInt();
 
@@ -152,9 +156,10 @@ public class Client {
             } else {
                 handleResponse("buyStock", responseCode);
             }
+        } catch (IOException e) {
+            handleIOFailure(e);
         } catch (Exception e) {
-            System.out.println("Unable to buy stock from the market.");
-            LOGGER.warning(e.getMessage());
+            LOGGER.severe("Unable to buy stock from the market - " + e.getMessage());
         }
 
     }
@@ -177,23 +182,25 @@ public class Client {
                 return;
 
             connection.getOutputStream().writeInt(Command.SELL.getValue());
-            connection.getOutputStream().writeBytes(name + "\n");
+            connection.getOutputStream().writeBytes(name);
             connection.getOutputStream().writeInt(quantity);
 
             connection.getOutputStream().flush();
 
+            connection.getInputStream().readInt();
             boolean response = connection.getInputStream().readInt() == 1;
             int responseCode = connection.getInputStream().readInt();
 
-            if(response) {
+            if (response) {
                 updateStock(new Stock(name, quantity * -1, ownedStocks.get(name).getPrice()));
                 updateBalance(quantity * ownedStocks.get(name).getPrice());
             } else {
                 handleResponse("sellStock", responseCode);
             }
+        } catch (IOException e) {
+            handleIOFailure(e);
         } catch (Exception e) {
-            System.out.println("Unable to sell stock from the market.");
-            LOGGER.warning(e.getMessage());
+            LOGGER.severe("Unable to sell stock to the market - " + e.getMessage());
         }
     }
 
@@ -232,6 +239,12 @@ public class Client {
                 System.out.println("Invalid Option");
                 break;
         }
+    }
+
+    private void handleIOFailure(Throwable ignored) {
+        connection.close();
+        LOGGER.severe("Disconnecting from the server - An IO error occurred during communication with the server.");
+        System.exit(0);
     }
 
     public static void main(String args[]) {

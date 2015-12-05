@@ -105,8 +105,8 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
 
         response.writeInt(1);
 
-        if ((Boolean) server.getAttribute("isPrimary")) {
-            response.writeInt(1);
+        if (!((Boolean) server.getAttribute("isPrimary"))) {
+            response.writeInt(0);
 
             String primaryHost = (String) ConnectionHandler.getInstance().getServer(0).getAttribute("host");
             int primaryPort = (int) ConnectionHandler.getInstance().getServer(0).getAttribute("port");
@@ -117,11 +117,9 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
 
             response.writeInt(primaryPort);
 
-        } else response.writeInt(0);
+        } else response.writeInt(1);
 
         writeResponse(ctx, response, false);
-
-        // writeResponse(ctx, 1, ((Boolean) server.getAttribute("isPrimary")) ? 1 : 0, false);
 
         return server;
     }
@@ -138,17 +136,21 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
         if (in.readableBytes() < 16)
             return null;
 
-        String host = Integer.toString(in.readInt());
-        for (int i = 0; i < 3; i++)
-            host +=  "." + Integer.toString(in.readInt());
-
         Connection client = null;
 
-        try {
-            client = ConnectionHandler.getInstance().register(ctx.channel(), host);
-            writeResponse(ctx, 1, 1, false);
-        } catch (IndexOutOfBoundsException e) {
-            writeResponse(ctx, 0, 1, true);
+        if (ConnectionHandler.getInstance().getNoOfServers() > 0) {
+            String host = Integer.toString(in.readInt());
+            for (int i = 0; i < 3; i++)
+                host += "." + Integer.toString(in.readInt());
+
+            try {
+                client = ConnectionHandler.getInstance().register(ctx.channel(), host);
+                writeResponse(ctx, 1, 1, false);
+            } catch (IndexOutOfBoundsException e) {
+                writeResponse(ctx, 0, 1, true);
+            }
+        } else {
+            writeResponse(ctx, 0, 2, true);
         }
 
         return client;
