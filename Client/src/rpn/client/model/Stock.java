@@ -1,5 +1,8 @@
 package rpn.client.model;
 
+/**
+ * Represents a stock object which contains the name, quantity and price.
+ */
 public class Stock {
 
     private String name;
@@ -27,9 +30,4 @@ public class Stock {
     public int getPrice() {
         return price;
     }
-
-    public void setPrice(int price) {
-        this.price = price;
-    }
-
 }
