@@ -13,7 +13,7 @@ public class Service {
      * Constructor will initialise the Service by populating the stock market
      */
     public Service() {
-        this("GOOG,100,7;TWTR,70,6;APPL,40,10;");
+        this("GOOG,9000,7;TWTR,7000,6;APPL,4000,10;");
     }
 
     public Service(String stocks) {
