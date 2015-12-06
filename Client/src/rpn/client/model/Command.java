@@ -1,12 +1,16 @@
 package rpn.client.model;
 
+/**
+ * This command is used within the menu for the user and has a value which can be used to
+ * identify the command.
+ */
 public enum Command {
-    BUY     (0, "Buy Stock"),
-    SELL    (1, "Sell Stock"),
-    REFRESH (2, "View Stock List"),
-    OWNED   (3, "View My Stock List"),
-    BALANCE (4, "Check My Account Balance"),
-    QUIT    (5, "Quit");
+    BUY(0, "Buy Stock"),
+    SELL(1, "Sell Stock"),
+    REFRESH(2, "View Stock List"),
+    OWNED(3, "View My Stock List"),
+    BALANCE(4, "Check My Account Balance"),
+    QUIT(5, "Quit");
 
     int value;
     String description;
@@ -25,7 +29,7 @@ public enum Command {
     }
 
     public static Command[] list() {
-        return new Command[] {
+        return new Command[]{
                 BUY,
                 SELL,
                 REFRESH,

@@ -4,6 +4,10 @@ import rpn.client.model.Command;
 
 import java.util.Scanner;
 
+/**
+ * Represents the menu handling within the project. Displays menus to the user and prompts
+ * which allow the user to interact.
+ */
 public class Menu {
 
     private Command[] commands;
@@ -36,7 +40,7 @@ public class Menu {
         Command option = null;
         System.out.print("Option: ");
         try {
-            option =  Command.valueOf(scanner.nextInt());
+            option = Command.valueOf(scanner.nextInt());
         } catch (Exception e) {
             scanner.nextLine();
         }

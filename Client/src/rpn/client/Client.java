@@ -9,11 +9,21 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+/**
+ * Represents a client and its actions
+ */
 public class Client {
 
+    /**
+     * A <code>Logger</code> used for printing debugging information of various type.
+     */
     public static final Logger LOGGER = Logger.getLogger(Client.class.getName());
 
+    /**
+     * Represents a connection to the server.
+     */
     private Connection connection;
+
 
     private Menu menu = new Menu(Command.list(), Command.QUIT);
 
@@ -22,16 +32,38 @@ public class Client {
      */
     private double balance = 1000;
 
+    /**
+     * Hashmap that stores the stocks owned by the user, hashed on string -> stock name. value -> Stock itself.
+     */
     private HashMap<String, Stock> ownedStocks = new HashMap<>();
 
+
+    /**
+     * Constructor for client passing in host and port of gateway.
+     *
+     * @param host of gateway
+     * @param port of gateway
+     * @throws IOException
+     */
     public Client(String host, int port) throws IOException {
         this.connection = new Connection(host, port);
     }
 
+    /**
+     * Updates the clients balance by the given value.
+     *
+     * @param balance amount to increase/decrease by
+     */
     private void updateBalance(double balance) {
         this.balance += balance;
     }
 
+    /**
+     * If the client already has some of the stock, then update it
+     * otherwise just add the new stock to the owned stocks hashmap.
+     *
+     * @param stock which stock to update
+     */
     private void updateStock(Stock stock) {
         if (ownedStocks.containsKey(stock.getName())) {
             stock.setQuantity(stock.getQuantity() + ownedStocks.get(stock.getName()).getQuantity());
@@ -40,6 +72,13 @@ public class Client {
         ownedStocks.put(stock.getName(), stock);
     }
 
+    /**
+     * Initialise connection and runs the main client loop where they see the menu,
+     * <p>
+     * closes the connection after it has been terminated.
+     *
+     * @throws IOException
+     */
     public void run() throws IOException {
         this.connection.init();
 
@@ -48,6 +87,9 @@ public class Client {
         this.connection.close();
     }
 
+    /**
+     * Handles the users menu choice, exits loop when users chooses terminate.
+     */
     private void runDisplayLoop() {
         Command choice;
         while (!menu.getTerminator().equals(choice = menu.getMainChoice())) {
@@ -55,6 +97,11 @@ public class Client {
         }
     }
 
+    /**
+     * Executes the relevant option that the user has chosen from the displayed menu
+     *
+     * @param command the command that the user has chosen
+     */
     private void handleUserChoice(Command command) {
         switch (command) {
             case BUY:
@@ -107,8 +154,19 @@ public class Client {
         return stocks;
     }
 
+    /**
+     * Checks whether the user has entered a correct stock name, amount and whether they
+     * have enough funds to afford the stock.
+     * <p>
+     * Displays error messages to the user where appropriate.
+     *
+     * @param stocks stores the real time stocks from the market
+     * @param stock  the string value of the name of the stock the user wants to buy
+     * @param amount the integer value of the amount of stocks the user wants to buy
+     * @return true or false to whether the user can buy the stock.
+     */
     public boolean canBuy(HashMap<String, Stock> stocks, String stock, int amount) {
-        if(!stocks.containsKey(stock)) {
+        if (!stocks.containsKey(stock)) {
             System.out.println("Invalid stock name, please try again.\n");
             return false;
         } else if (stocks.get(stock).getQuantity() < amount || amount <= 0) {
@@ -117,7 +175,7 @@ public class Client {
         } else if (amount * stocks.get(stock).getPrice() > balance) {
             System.out.println("You cannot afford " + amount + " " + stock + " stocks.");
             System.out.println("The maximum number you can afford with £" + balance
-                    + " is " + ((int) Math.floor(balance/stocks.get(stock).getPrice())) + "\n");
+                    + " is " + ((int) Math.floor(balance / stocks.get(stock).getPrice())) + "\n");
             return false;
         } else {
             return true;
@@ -125,11 +183,17 @@ public class Client {
 
     }
 
+
     /**
-     * Request and output available stocks
-     * Ask to enter valid name (a valid key in HashMap)
-     * Ask to enter valid, affordable amount (stored in tuple value in HashMap
-     * Send 0, stock name, and amount to
+     * If canBuy() then try to buy stock by requesting to the server.
+     * <p>
+     * Send the transaction details to the gateway, hangs till response
+     * Log severe if unable to buy from the stock market
+     * <p>
+     * Otherwise, update the clients stock and display success message to user.
+     *
+     * @param name     of stock to buy
+     * @param quantity the number of stocks to buy
      */
     public void buyStock(String name, int quantity) {
         HashMap<String, Stock> stocks = getStocksFromMarket();
@@ -142,14 +206,12 @@ public class Client {
             connection.getOutputStream().writeInt(name.length() + 4);
             connection.getOutputStream().writeBytes(name);
             connection.getOutputStream().writeInt(quantity);
-
             connection.getOutputStream().flush();
-
             connection.getInputStream().readInt();
             boolean response = connection.getInputStream().readInt() == 1;
             int responseCode = connection.getInputStream().readInt();
 
-            if(response) {
+            if (response) {
                 updateStock(new Stock(name, quantity, stocks.get(name).getPrice()));
                 updateBalance(quantity * stocks.get(name).getPrice() * -1);
                 System.out.println("Transaction Complete. You now own " + ownedStocks.get(name).getQuantity() + " " + name + " stocks.\n");
@@ -164,8 +226,15 @@ public class Client {
 
     }
 
+    /**
+     * Tests whether the user has enough of the stock, displays error messages if they dont.
+     *
+     * @param name     of the stock
+     * @param quantity of the stock to sell
+     * @return true or false whether the user can sell the given stock
+     */
     public boolean canSell(String name, int quantity) {
-        if(!ownedStocks.containsKey(name)) {
+        if (!ownedStocks.containsKey(name)) {
             System.out.println("You do not own any " + name + " stocks, please try again.\n");
             return false;
         } else if (quantity > ownedStocks.get(name).getQuantity() || quantity <= 0) {
@@ -176,6 +245,17 @@ public class Client {
         }
     }
 
+    /**
+     * If canSell() then try to sell stock by requesting to the server.
+     * <p>
+     * Send the transaction details to the gateway, hangs till response
+     * Log severe if unable to sell from the stock market
+     * <p>
+     * Otherwise, update the clients stock and display success message to user.
+     *
+     * @param name     of the stock
+     * @param quantity of the stock to sell
+     */
     public void sellStock(String name, int quantity) {
         try {
             if (!canSell(name, quantity))
@@ -206,10 +286,16 @@ public class Client {
         }
     }
 
+    /**
+     * Prints the stock list from the server
+     */
     public void viewStockList() {
         printStocksMap(getStocksFromMarket());
     }
 
+    /**
+     * Prints the stocks that the user currently owns
+     */
     public void viewOwnedStocks() {
         printStocksMap(ownedStocks);
     }
@@ -230,10 +316,19 @@ public class Client {
         System.out.println("|_____________________________________|\n");
     }
 
+    /**
+     * Prints the users balance on the screen
+     */
     public void printBalance() {
         System.out.println("Your Balance: " + balance + "\n");
     }
 
+    /**
+     * Outputs relevant error message based on the handle response string and code.
+     *
+     * @param method
+     * @param responseCode
+     */
     private void handleResponse(String method, int responseCode) {
         switch (method + ":" + responseCode) {
             case "buyStock:2":
@@ -249,12 +344,23 @@ public class Client {
         }
     }
 
+
+    /**
+     * Close the client
+     *
+     * @param ignored
+     */
     private void handleIOFailure(Throwable ignored) {
         connection.close();
         LOGGER.severe("Disconnecting from the server - An IO error occurred during communication with the server.");
         System.exit(0);
     }
 
+    /**
+     * Ensure that the host and port are given, runs the main client program.
+     *
+     * @param args
+     */
     public static void main(String args[]) {
         if (args.length < 2) {
             System.out.println("Please provide the gateway host, and port.");

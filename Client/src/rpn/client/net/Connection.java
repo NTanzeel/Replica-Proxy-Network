@@ -44,18 +44,32 @@ public class Connection {
         this.outputStream = new DataOutputStream(socket.getOutputStream());
     }
 
+
+    /**
+     * Throws exception if the client limit is reached or gateway refuses connection.
+     *
+     * @throws IOException
+     */
     public void init() throws IOException {
         int response[] = handshake();
 
         if (response[0] == 0) {
             if (response[1] == 1) {
                 throw new IOException("Unable to connect to server, client limit reached.");
-            } else if (response[1] == 2){
+            } else if (response[1] == 2) {
                 throw new IOException("Unable to connect to server, connection refused.");
             }
         }
     }
 
+    /**
+     * Initalise connection with the server, tell that it is client,
+     *
+     * server replies with resposnse.
+     *
+     * @return integer array of the responses from the server.
+     * @throws IOException
+     */
     private int[] handshake() throws IOException {
         outputStream.writeInt(0);
 
@@ -66,7 +80,7 @@ public class Connection {
 
         outputStream.flush();
 
-        return new int[] {inputStream.readInt(), inputStream.readInt()};
+        return new int[]{inputStream.readInt(), inputStream.readInt()};
     }
 
     public String getHost() {
