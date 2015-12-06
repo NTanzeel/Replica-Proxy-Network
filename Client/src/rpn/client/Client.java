@@ -4,6 +4,7 @@ import rpn.client.io.Menu;
 import rpn.client.model.Command;
 import rpn.client.model.Stock;
 import rpn.client.net.Connection;
+import sun.rmi.runtime.Log;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -326,8 +327,8 @@ public class Client {
     /**
      * Outputs relevant error message based on the handle response string and code.
      *
-     * @param method
-     * @param responseCode
+     * @param method The calling method.
+     * @param responseCode The response code.
      */
     private void handleResponse(String method, int responseCode) {
         switch (method + ":" + responseCode) {
@@ -348,10 +349,11 @@ public class Client {
     /**
      * Close the client
      *
-     * @param ignored
+     * @param ignored Ignored exception.
      */
     private void handleIOFailure(Throwable ignored) {
         connection.close();
+        LOGGER.warning(ignored.getMessage());
         LOGGER.severe("Disconnecting from the server - An IO error occurred during communication with the server.");
         System.exit(0);
     }
@@ -359,7 +361,7 @@ public class Client {
     /**
      * Ensure that the host and port are given, runs the main client program.
      *
-     * @param args
+     * @param args The arguments passed by user on runtime.
      */
     public static void main(String args[]) {
         if (args.length < 2) {

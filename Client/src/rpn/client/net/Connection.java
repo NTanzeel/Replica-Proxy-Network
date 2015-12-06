@@ -38,7 +38,7 @@ public class Connection {
     public Connection(String host, int port) throws IOException {
         this.host = host;
         this.port = port;
-        this.socket = new Socket(host, port);
+        this.socket = new Socket(getHost(), getPort());
 
         this.inputStream = new DataInputStream(socket.getInputStream());
         this.outputStream = new DataOutputStream(socket.getOutputStream());
