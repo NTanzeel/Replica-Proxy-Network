@@ -10,11 +10,11 @@ The protocol is presented as a simple buy and sell system, which in this case us
 
 1) Start by changing your directory to the project root directory.
 
-2) Start the gateway
+2) Start the gateway using the instructions below.
 
-3) Start up a server.
+3) Start up one or more server using the instructions below.
 
-4) Start up a client.
+4) Start up a client using the instructions below.
 
 ## Starting the gateway ##
 
