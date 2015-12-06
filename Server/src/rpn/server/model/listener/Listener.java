@@ -5,6 +5,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import rpn.server.Server;
 import rpn.server.net.handlers.ListenerChannelHandler;
 
 public class Listener implements Runnable {
@@ -51,7 +52,9 @@ public class Listener implements Runnable {
         try {
             bind();
         } catch (Exception e) {
-            e.printStackTrace();
+            isRunning = false;
+            Server.LOGGER.severe("Listener - Status: Disconnected, Reason: '" + e.getMessage() + "'");
+            Server.getInstance().stop();
         }
     }
 

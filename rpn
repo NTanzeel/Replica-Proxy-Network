@@ -1,0 +1,65 @@
+#!/bin/sh
+
+function help {
+	echo "Usage: rpn start <component>";
+	echo "\nComponents:";
+	echo "\t gateway <port>";
+	echo "\t server <gatewayHost> <gatewayPort> <serverPort>";
+	echo "\t client <gatewayHost> <gatewayPort>";
+	exit 1;
+}
+
+function startClient {
+	if [[ $# -ne 4 ]]
+	then
+		help
+	fi
+
+	java -cp ./out/production/Client:./libraries/netty.jar: rpn.client.Client $3 $4
+}
+
+function startServer {
+	if [[ $# -ne 5 ]]
+	then
+		help
+	fi
+
+	java -cp ./out/production/Server:./libraries/netty.jar: rpn.server.Server $3 $4 $5
+}
+
+function startGateway {
+	if [[ $# -ne 3 ]]
+	then
+		help
+	fi
+
+	java -cp ./out/production/Gateway:./libraries/netty.jar: rpn.gateway.Gateway $3
+}
+
+function selectChoice {
+	case $2 in
+		"gateway") 
+			startGateway $@
+			;;
+		server) 
+			startServer $@
+			;;
+		client) 
+			startClient $@
+			;;
+		*)
+			help
+			;;
+	esac
+}
+
+function main {
+	if [[ "$1" -ne "start" ]]
+	then
+		help
+	fi
+
+	selectChoice $@
+}
+
+main $@

@@ -117,7 +117,7 @@ public class Client {
         } else if (amount * stocks.get(stock).getPrice() > balance) {
             System.out.println("You cannot afford " + amount + " " + stock + " stocks.");
             System.out.println("The maximum number you can afford with £" + balance
-                    + " is " + balance/stocks.get(stock).getPrice() + "\n");
+                    + " is " + ((int) Math.floor(balance/stocks.get(stock).getPrice())) + "\n");
             return false;
         } else {
             return true;
@@ -237,14 +237,14 @@ public class Client {
     private void handleResponse(String method, int responseCode) {
         switch (method + ":" + responseCode) {
             case "buyStock:2":
-                System.out.println("Not enough stocks available. Please resubmit.");
+                System.out.println("Not enough stocks available. Please try again.\n");
                 break;
             case "sellStock:2":
-                System.out.println("You do not have enough stocks to sell, please try again.");
+                System.out.println("You do not have enough stocks to sell, please try again.\n");
                 break;
             case "buyStock:3":
             case "sellStock:3":
-                System.out.println("Invalid Option");
+                System.out.println("Invalid Option.\n");
                 break;
         }
     }
@@ -256,6 +256,11 @@ public class Client {
     }
 
     public static void main(String args[]) {
+        String host = args[0];
+        int port = Integer.parseInt(args[1]);
+
+
+
         try {
             new Client("0.0.0.0", 43590).run();
         } catch (IOException e) {
