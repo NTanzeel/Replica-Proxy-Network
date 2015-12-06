@@ -21,14 +21,6 @@ public abstract class Client implements Runnable {
         this.port = port;
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
     public Channel getChannel() {
         return channel;
     }

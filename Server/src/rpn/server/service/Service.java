@@ -7,12 +7,12 @@ public class Service {
     /**
      * HashMap of available stocks
      */
-    private HashMap<String, Stock> stocks = new HashMap<String, Stock>();
+    private HashMap<String, Stock> stocks = new HashMap<>();
 
     /**
      * Constructor will initialise the Service by populating the stock market
      */
-    public Service(){
+    public Service() {
         this("GOOG,100,7;TWTR,70,6;APPL,40,10;");
     }
 
@@ -23,7 +23,7 @@ public class Service {
     /**
      * Populate market with initial stock prices and quantities
      */
-    public void initialiseMarket(String stocks){
+    public void initialiseMarket(String stocks) {
         for (String s : stocks.split(";")) {
             String[] stock = s.split(",");
             this.stocks.put(stock[0], new Stock(stock[0], Integer.parseInt(stock[1]), Integer.parseInt(stock[2])));
@@ -33,42 +33,29 @@ public class Service {
     /**
      * Method to check if the requested stock quantity is available to buy
      *
-     * @param buyAmount
-     * @param availableStocks
+     * @param buyAmount the amount to buy.
+     * @param availableStocks the available amount.
      * @return Returns true if there are enough stocks to buy, false otherwise
      */
-    public boolean checkQuantity(int buyAmount, int availableStocks){
-        if( buyAmount > availableStocks) { return false; }
-        else { return true; }
-    }
-
-    /**
-     * Method to check is the requested stock exists
-     *
-     * @param stock represents the name of the stock being bought or sold
-     * @return Returns true if the specified stock exists, false otherwise
-     */
-    public boolean stockExists(String stock){
-        if(stocks.containsKey(stock)){ return true; }
-        else { return false; }
+    public boolean checkQuantity(int buyAmount, int availableStocks) {
+        return buyAmount <= availableStocks;
     }
 
     /**
      * Method to reflect the clients purchase (reduces quantity for specified stock)
      *
-     * @param stock represents the name of the stock being bought or sold
+     * @param stock    represents the name of the stock being bought or sold
      * @param quantity represents the amount of stock being bought or sold
      * @return Returns response code representing a successfully processed request or an error
      */
-    public int buyStock(String stock, int quantity){
+    public int buyStock(String stock, int quantity) {
         int availableStocks = stocks.get(stock).getQuantity();
 
-        if(checkQuantity(quantity, availableStocks)) {
+        if (checkQuantity(quantity, availableStocks)) {
             stocks.get(stock).setQuantity(availableStocks - quantity);
 
             return 1;
-        }else{
-            //Error code 2 represents trying to buy too many stocks
+        } else {
             return 2;
         }
     }
@@ -76,12 +63,12 @@ public class Service {
     /**
      * Method to reflect the clients sale (increases quantity for specified stock)
      *
-     * @param stock represents the name of the stock being bought or sold
+     * @param stock    represents the name of the stock being bought or sold
      * @param quantity represents the amount of stock being bought or sold
      * @return Returns response code representing a successfully processed request or an error
      */
     //
-    public int sellStock(String stock, int quantity){
+    public int sellStock(String stock, int quantity) {
         stocks.get(stock).setQuantity(stocks.get(stock).getQuantity() - quantity);
 
         return 1;

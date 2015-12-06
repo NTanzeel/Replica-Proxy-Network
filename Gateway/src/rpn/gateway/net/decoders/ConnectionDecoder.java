@@ -10,6 +10,11 @@ import rpn.gateway.model.connection.ConnectionHandler;
 
 import java.util.List;
 
+/**
+ * Extends the <code>ByteToMessageDecoder</code> class which provides a buffer of incoming data and an empty list
+ * which the decoded messages should be added to.
+ * Responsible for decoding new incoming connections and outputting the appropriate <code>Connection</code> object.
+ */
 public class ConnectionDecoder extends ByteToMessageDecoder {
 
     /**
@@ -36,7 +41,7 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
      * is available inside the buffer.
      *
      * @param ctx The channel handler, passed through as a parameter by Netty
-     * @param in A buffer containing an in-stream of bytes
+     * @param in  A buffer containing an in-stream of bytes
      * @param out A decoded list of objects from the buffer.
      * @throws Exception Throws an Exception in case of any errors.
      */
@@ -44,10 +49,10 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         switch (state) {
             case Initial:
-                    initializeConnection(in);
+                initializeConnection(in);
                 break;
             case Pending:
-                    establishConnection(ctx, in, out);
+                establishConnection(ctx, in, out);
                 break;
         }
     }
@@ -66,9 +71,10 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
     }
 
     /**
+     * Establish a new connection by performing a handshake and outputs the appropriate connection.
      *
      * @param ctx The channel handler, passed through as a parameter by Netty
-     * @param in A buffer containing an in-stream of bytes
+     * @param in  A buffer containing an in-stream of bytes
      * @param out A decoded list of objects from the buffer.
      */
     public void establishConnection(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
@@ -86,7 +92,7 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
      * not enough information is available to produce a Connection object.
      *
      * @param ctx The channel handler, passed through as a parameter by Netty
-     * @param in A buffer containing an in-stream of bytes
+     * @param in  A buffer containing an in-stream of bytes
      * @return A Connection object representing the servers connection or null
      */
     public Connection getServer(ChannelHandlerContext ctx, ByteBuf in) {
@@ -95,7 +101,7 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
 
         String host = Integer.toString(in.readInt());
         for (int i = 0; i < 3; i++)
-            host +=  "." + Integer.toString(in.readInt());
+            host += "." + Integer.toString(in.readInt());
 
         int port = in.readInt();
 
@@ -129,7 +135,7 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
      * not enough information is available to produce a Connection object.
      *
      * @param ctx The channel handler, passed through as a parameter by Netty
-     * @param in A buffer containing an in-stream of bytes
+     * @param in  A buffer containing an in-stream of bytes
      * @return A Connection object representing the clients connection or null
      */
     public Connection getClient(ChannelHandlerContext ctx, ByteBuf in) {
@@ -160,9 +166,9 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
      * Writes a success or failure code back to the client/server and, if requested, closes the connection upon
      * completion.
      *
-     * @param ctx The channel handler, passed through as a parameter by Netty
-     * @param success Whether a connection has successfully been established
-     * @param status The status of the connection, usually a 1 for success or an integer error code for failure
+     * @param ctx        The channel handler, passed through as a parameter by Netty
+     * @param success    Whether a connection has successfully been established
+     * @param status     The status of the connection, usually a 1 for success or an integer error code for failure
      * @param forceClose Whether the connection should be forcefully closed upon write completion
      */
     private void writeResponse(ChannelHandlerContext ctx, int success, int status, boolean forceClose) {
@@ -170,6 +176,13 @@ public class ConnectionDecoder extends ByteToMessageDecoder {
         writeResponse(ctx, response, forceClose);
     }
 
+    /**
+     * Writes the specified buffer to the channel and, if requested, closes the connection upon completion.
+     *
+     * @param ctx        The channel handler, passed through as a parameter by Netty.
+     * @param response   A buffer containing the response to be written to the channel.
+     * @param forceClose Whether the connection should be forcefully closed upon write completion
+     */
     private void writeResponse(ChannelHandlerContext ctx, ByteBuf response, boolean forceClose) {
         ChannelFuture channelFuture = ctx.writeAndFlush(response);
         if (forceClose) {

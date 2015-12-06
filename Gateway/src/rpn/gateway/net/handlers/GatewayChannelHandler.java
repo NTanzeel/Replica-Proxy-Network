@@ -8,6 +8,10 @@ import rpn.gateway.model.connection.ConnectionHandler;
 import rpn.gateway.model.packets.Packet;
 import rpn.gateway.model.packets.PacketHandler;
 
+/**
+ * Extends the <code>ChannelHandlerAdapter</code> provided by Netty and overrides any method necessary.
+ * Handles the channel for connections to the gateway. A new instance is created for each connection.
+ */
 public class GatewayChannelHandler extends ChannelHandlerAdapter {
 
     /**
@@ -15,6 +19,12 @@ public class GatewayChannelHandler extends ChannelHandlerAdapter {
      */
     private Connection connection = null;
 
+    /**
+     * This method is called automatically by Netty whenever the connection associated with this handler is dropped.
+     * DeRegisters the connection from the <code>ConnectionHandler</code>. If the last server is removed and an
+     * <code>IllegalStateException</code> is thrown then the entire Gateway is disconnected.
+     * @param ctx @param ctx The channel handler, passed through as a parameter by Netty
+     */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         if (connection != null) {
@@ -28,6 +38,13 @@ public class GatewayChannelHandler extends ChannelHandlerAdapter {
         }
     }
 
+    /**
+     * This method is called automatically by Netty whenever the decoder outputs a message.
+     * Determines the type of message. If the message is a new connection then register it, otherwise if the message
+     * is a packet then queue it for processing.
+     * @param ctx The channel handler, passed through as a parameter by Netty
+     * @param msg The decoded message output by the decoder.
+     */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof Connection) {
@@ -39,6 +56,12 @@ public class GatewayChannelHandler extends ChannelHandlerAdapter {
         }
     }
 
+    /**
+     * This method is called automatically by Netty whenever the an internal uncaught exception is thrown.
+     * As a response, the gateway is shutdown.
+     * @param ctx The channel handler, passed through as a parameter by Netty
+     * @param cause The cause of the exception.
+     */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         ctx.close();

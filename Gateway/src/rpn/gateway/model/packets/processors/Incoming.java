@@ -5,8 +5,20 @@ import rpn.gateway.model.connection.Connection;
 import rpn.gateway.model.connection.ConnectionHandler;
 import rpn.gateway.model.packets.Packet;
 
+/**
+ * Extends the abstract <code>PacketProcessor</code> class.
+ * Responsible for processing all incoming, client to server, packets.
+ */
 public class Incoming extends PacketProcessor {
 
+    /**
+     * Called every time a packet needs to be processed. Processes a given packet.
+     * This implementation of the packet processor takes an outgoing packet and identifies it's destination.
+     * The packet is then relayed to it's intended recipient.
+     *
+     * @param packet The packet to be processed.
+     * @return Boolean true or false, whether the packet was successfully processed.
+     */
     @Override
     public boolean process(Packet packet) {
         if (!packet.getSender().isActive() || ConnectionHandler.getInstance().getNoOfServers() == 0)

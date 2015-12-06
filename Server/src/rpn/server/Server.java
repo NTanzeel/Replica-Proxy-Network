@@ -78,19 +78,20 @@ public class Server {
     public void stop() {
         LOGGER.info("Server - Status: Shutting Down");
         if (!isPrimary && primary.isRunning()) {
-            primary.stop();
+            getPrimary().stop();
         }
         if (listener.isRunning()) {
-            listener.stop();
+            getListener().stop();
         }
         if (gateway.isRunning()) {
-            gateway.stop();
+            getGateway().stop();
         }
     }
 
     public static void main(String[] args) {
         if (args.length < 3) {
             System.out.println("Please provide the gateway host, gateway port, and a server port.");
+            return;
         }
 
         String gatewayHost = args[0];

@@ -44,10 +44,6 @@ public class Request {
         return opCode;
     }
 
-    public int getSize() {
-        return size;
-    }
-
     public int getSenderId() {
         return senderId;
     }

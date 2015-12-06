@@ -26,6 +26,7 @@ public class Connection {
 
     /**
      * Instantiate a new connection.
+     *
      * @param channel The channel associated with the connection.
      */
     public Connection(Channel channel) {
@@ -33,16 +34,8 @@ public class Connection {
     }
 
     /**
-     * Checks to see whether the client has an attribute assigned.
-     * @param key The key/name for the attribute.
-     * @return Boolean true or false, whether the attribute is assigned.
-     */
-    public boolean hasAttribute(String key) {
-        return attributes.containsKey(key);
-    }
-
-    /**
      * Gets an attribute by key and returns the object associated with it.
+     *
      * @param key The key/name for the attribute.
      * @return The object associated with they key.
      */
@@ -52,7 +45,8 @@ public class Connection {
 
     /**
      * Sets an attribute for this connection instance.
-     * @param key The key/name for the attribute.
+     *
+     * @param key   The key/name for the attribute.
      * @param value The object to associate with the key.
      */
     public void setAttribute(String key, Object value) {
@@ -61,6 +55,7 @@ public class Connection {
 
     /**
      * Gets the channel associated with this connection.
+     *
      * @return The channel associated with this connection
      */
     public Channel getChannel() {
@@ -69,6 +64,7 @@ public class Connection {
 
     /**
      * Gets whether the connection is active.
+     *
      * @return whether the connection is active.
      */
     public boolean isActive() {

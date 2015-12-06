@@ -12,7 +12,7 @@ public class ReplicaHandler {
         return instance;
     }
 
-    private HashMap<Integer, Replica> replicas = new HashMap<Integer, Replica>();
+    private HashMap<Integer, Replica> replicas = new HashMap<>();
 
     public void registerReplica(Replica connection) {
         synchronized (this) {
@@ -24,14 +24,6 @@ public class ReplicaHandler {
         synchronized (this) {
             replicas.remove(connection.hashCode());
         }
-    }
-
-    public Collection<Integer> getIds() {
-        Collection<Integer> ids;
-        synchronized (this) {
-            ids = Collections.unmodifiableCollection(this.replicas.keySet());
-        }
-        return ids;
     }
 
     public Collection<Replica> getReplicas() {

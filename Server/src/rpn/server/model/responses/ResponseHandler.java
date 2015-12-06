@@ -19,7 +19,7 @@ public class ResponseHandler implements Runnable {
 
     private boolean isRunning = false;
 
-    private HashMap<Integer, Response> pending = new HashMap<Integer, Response>();
+    private HashMap<Integer, Response> pending = new HashMap<>();
 
     private Queue<Response> acknowledged = new LinkedList<>();
 

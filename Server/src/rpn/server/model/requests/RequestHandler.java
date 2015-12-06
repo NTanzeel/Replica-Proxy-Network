@@ -23,7 +23,7 @@ public class RequestHandler implements Runnable {
 
     private boolean isRunning = false;
 
-    private Queue<Request> requests = new LinkedList<Request>();
+    private Queue<Request> requests = new LinkedList<>();
 
     private RequestProcessor[] requestProcessors = {new Buy(), new Sell(), new Refresh()};
 
