@@ -2,6 +2,9 @@ package rpn.server.model.requests;
 
 import io.netty.buffer.ByteBuf;
 
+/**
+ * Represents a request from the client.
+ */
 public class Request {
 
     private int id;

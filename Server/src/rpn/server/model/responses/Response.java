@@ -4,6 +4,9 @@ import io.netty.buffer.ByteBuf;
 
 import java.util.ArrayList;
 
+/**
+ * Represents a response from the primary to the client.
+ */
 public class Response {
 
     private final int id;

@@ -1,5 +1,8 @@
 package rpn.server.entities.listener;
 
+/**
+ * Represents an acknowledgement from a replica for a request.
+ */
 public class Ack {
 
     private int id;

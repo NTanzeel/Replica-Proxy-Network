@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * Handles all responses from the primary to the client.
+ */
 public class ResponseHandler implements Runnable {
 
     private static ResponseHandler instance = new ResponseHandler();

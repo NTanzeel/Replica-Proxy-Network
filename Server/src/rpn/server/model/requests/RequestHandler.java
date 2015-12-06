@@ -13,6 +13,9 @@ import rpn.server.model.responses.ResponseHandler;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * Handles all incoming requests from the client.
+ */
 public class RequestHandler implements Runnable {
 
     public static RequestHandler instance = new RequestHandler();

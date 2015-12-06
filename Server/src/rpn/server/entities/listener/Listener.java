@@ -8,6 +8,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import rpn.server.Server;
 import rpn.server.net.handlers.ListenerChannelHandler;
 
+/**
+ * The listener server.
+ */
 public class Listener implements Runnable {
 
     private boolean isRunning = false;

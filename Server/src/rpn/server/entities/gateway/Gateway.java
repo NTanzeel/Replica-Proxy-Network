@@ -5,6 +5,9 @@ import rpn.server.entities.client.Client;
 import rpn.server.net.decoders.GatewayConnectionDecoder;
 import rpn.server.net.handlers.GatewayChannelHandler;
 
+/**
+ * Extends the client and inherits all properties and methods.
+ */
 public class Gateway extends Client {
 
     private String serverHost;

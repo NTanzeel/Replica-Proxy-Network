@@ -7,24 +7,56 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import rpn.server.Server;
 
+/**
+ * An abstract class representing a socket connection to a server as a client.
+ */
 public abstract class Client implements Runnable {
 
+    /**
+     * Whether the client is running.
+     */
     private boolean isRunning = false;
 
+    /**
+     * The server host.
+     */
     private String host;
+
+    /**
+     * The server port
+     */
     private int port;
 
+    /**
+     * The channel associated with the connection.
+     */
     private Channel channel;
 
+    /**
+     * Creates a new instance to connect to a server using a socket client.
+     *
+     * @param host The server host.
+     * @param port The server port.
+     */
     public Client(String host, int port) {
         this.host = host;
         this.port = port;
     }
 
+    /**
+     * Gets the channel associated with the connection.
+     *
+     * @return The channel associated with the connection.
+     */
     public Channel getChannel() {
         return channel;
     }
 
+    /**
+     * Start the connection and open a socket.
+     *
+     * @throws Exception Thrown if there is an issue opening the socket.
+     */
     public void connect() throws Exception {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -45,6 +77,11 @@ public abstract class Client implements Runnable {
         }
     }
 
+    /**
+     * Gets the channel initializer.
+     *
+     * @return The channel initializer.
+     */
     protected ChannelInitializer<SocketChannel> getChannelInitializer() {
         return new ChannelInitializer<SocketChannel>() {
             @Override
@@ -54,8 +91,16 @@ public abstract class Client implements Runnable {
         };
     }
 
+    /**
+     * Abstract method to be overwritten by children to build the pipeline.
+     *
+     * @param pipeline The pipeline to initialise.
+     */
     protected abstract void initialisePipeline(ChannelPipeline pipeline);
 
+    /**
+     * Called when this instance is run in a thread. Calls the connect() method to open a connection.
+     */
     public void run() {
         try {
             connect();
@@ -66,10 +111,18 @@ public abstract class Client implements Runnable {
         }
     }
 
+    /**
+     * Gets whether the connection is open and client is running.
+     *
+     * @return Boolean true or false, whether the client is running.
+     */
     public boolean isRunning() {
         return isRunning;
     }
 
+    /**
+     * Starts this instance in a new thread if it isn't already running.
+     */
     public void start() {
         if (isRunning) {
             throw new IllegalStateException("The thread is already running. Please terminate the existing thread first.");
@@ -79,6 +132,9 @@ public abstract class Client implements Runnable {
         isRunning = true;
     }
 
+    /**
+     * Closes the channel which then proceeds to terminate the thread.
+     */
     public void stop() {
         if (!isRunning) {
             throw new IllegalStateException("The thread is not running. Please run the thread first.");

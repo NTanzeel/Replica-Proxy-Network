@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 
+/**
+ * Handles the connections to all backups.
+ */
 public class ReplicaHandler {
 
     private static ReplicaHandler instance = new ReplicaHandler();
