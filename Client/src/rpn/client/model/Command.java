@@ -4,8 +4,9 @@ public enum Command {
     BUY     (0, "Buy Stock"),
     SELL    (1, "Sell Stock"),
     REFRESH (2, "View Stock List"),
-    BALANCE (3, "Check My Account Balance"),
-    QUIT    (4, "Quit");
+    OWNED   (3, "View My Stock List"),
+    BALANCE (4, "Check My Account Balance"),
+    QUIT    (5, "Quit");
 
     int value;
     String description;
@@ -28,6 +29,7 @@ public enum Command {
                 BUY,
                 SELL,
                 REFRESH,
+                OWNED,
                 BALANCE,
                 QUIT
         };
@@ -42,8 +44,10 @@ public enum Command {
             case 2:
                 return REFRESH;
             case 3:
-                return BALANCE;
+                return OWNED;
             case 4:
+                return BALANCE;
+            case 5:
                 return QUIT;
             default:
                 return null;

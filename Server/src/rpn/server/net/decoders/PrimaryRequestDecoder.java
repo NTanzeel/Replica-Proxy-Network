@@ -1,4 +1,4 @@
-package rpn.server.model.primary;
+package rpn.server.net.decoders;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

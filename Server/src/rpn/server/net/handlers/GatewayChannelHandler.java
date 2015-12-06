@@ -1,4 +1,4 @@
-package rpn.server.model.gateway;
+package rpn.server.net.handlers;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
@@ -30,6 +30,8 @@ public class GatewayChannelHandler extends ChannelHandlerAdapter {
         out.writeInt(serverPort);
 
         ctx.writeAndFlush(out);
+
+        Server.LOGGER.info("Gateway - Status: Initialising");
     }
 
     @Override
@@ -39,6 +41,7 @@ public class GatewayChannelHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
+        Server.LOGGER.info("Gateway - Status: Disconnected");
         Server.getInstance().stop();
     }
 
@@ -52,13 +55,14 @@ public class GatewayChannelHandler extends ChannelHandlerAdapter {
             Server.LOGGER.info("Gateway - Status: Connected, Role: Primary");
         } else if (msg instanceof Request) {
             RequestHandler.getInstance().queue((Request) msg);
-            Server.LOGGER.info("Incoming Request: " + msg.toString());
+            Server.LOGGER.info("Gateway - Status: Request Received, Message: " + msg.toString());
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         ctx.close();
-        cause.printStackTrace();
+        Server.LOGGER.severe("Gateway - Status: Disconnected, Reason: " + cause.getMessage());
+        Server.getInstance().stop();
     }
 }

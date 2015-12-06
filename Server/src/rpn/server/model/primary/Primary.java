@@ -2,6 +2,8 @@ package rpn.server.model.primary;
 
 import io.netty.channel.ChannelPipeline;
 import rpn.server.model.client.Client;
+import rpn.server.net.decoders.PrimaryRequestDecoder;
+import rpn.server.net.handlers.PrimaryChannelHandler;
 
 public class Primary extends Client {
 

@@ -4,6 +4,7 @@ import rpn.server.model.gateway.Gateway;
 import rpn.server.model.primary.Primary;
 import rpn.server.model.listener.Listener;
 import rpn.server.service.Service;
+import sun.rmi.runtime.Log;
 
 import java.net.InetAddress;
 import java.util.logging.Logger;
@@ -76,6 +77,7 @@ public class Server {
     }
 
     public void stop() {
+        LOGGER.info("Server - Status: Shutting Down");
         if (!isPrimary && primary.isRunning()) {
             primary.stop();
         }

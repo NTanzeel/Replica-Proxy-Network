@@ -1,4 +1,4 @@
-package rpn.server.model.gateway;
+package rpn.server.net.decoders;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

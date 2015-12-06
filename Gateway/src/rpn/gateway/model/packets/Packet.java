@@ -1,4 +1,4 @@
-package rpn.gateway.net.packets;
+package rpn.gateway.model.packets;
 
 import io.netty.buffer.ByteBuf;
 import rpn.gateway.model.connection.Connection;

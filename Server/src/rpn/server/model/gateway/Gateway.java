@@ -2,6 +2,8 @@ package rpn.server.model.gateway;
 
 import io.netty.channel.ChannelPipeline;
 import rpn.server.model.client.Client;
+import rpn.server.net.decoders.GatewayConnectionDecoder;
+import rpn.server.net.handlers.GatewayChannelHandler;
 
 public class Gateway extends Client {
 

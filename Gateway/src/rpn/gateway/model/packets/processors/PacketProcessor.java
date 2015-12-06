@@ -1,6 +1,6 @@
-package rpn.gateway.net.packets.processors;
+package rpn.gateway.model.packets.processors;
 
-import rpn.gateway.net.packets.Packet;
+import rpn.gateway.model.packets.Packet;
 
 import java.util.LinkedList;
 import java.util.Queue;

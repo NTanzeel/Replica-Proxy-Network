@@ -8,7 +8,7 @@ import java.util.Collections;
 
 public class ConnectionHandler {
 
-    public static final ConnectionHandler instance = new ConnectionHandler(2);
+    public static final ConnectionHandler instance = new ConnectionHandler(10);
 
     public static ConnectionHandler getInstance() {
         return instance;
@@ -170,7 +170,7 @@ public class ConnectionHandler {
 
     private void electPrimary() throws IllegalStateException {
         if (servers.size() == 0){
-            throw new IllegalStateException("No servers are currently online to takeover");
+            throw new IllegalStateException("No servers are currently online to takeover as primary.");
         }
 
         Connection primary;

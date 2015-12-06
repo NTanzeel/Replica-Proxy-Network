@@ -1,11 +1,10 @@
-package rpn.server.model.primary;
+package rpn.server.net.handlers;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import rpn.server.Server;
-import rpn.server.model.gateway.GatewayConnectionDecoder;
-import rpn.server.service.Service;
+import rpn.server.net.decoders.GatewayConnectionDecoder;
 
 import java.nio.charset.Charset;
 

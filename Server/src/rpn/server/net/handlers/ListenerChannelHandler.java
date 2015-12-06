@@ -1,11 +1,13 @@
-package rpn.server.model.listener;
+package rpn.server.net.handlers;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import rpn.server.Server;
+import rpn.server.model.listener.Ack;
 import rpn.server.model.replica.Replica;
 import rpn.server.model.replica.ReplicaHandler;
 import rpn.server.model.responses.ResponseHandler;
+import rpn.server.net.decoders.ListenerConnectionDecoder;
 
 public class ListenerChannelHandler extends ChannelHandlerAdapter{
 
@@ -45,5 +47,12 @@ public class ListenerChannelHandler extends ChannelHandlerAdapter{
             ResponseHandler.getInstance().acknowledge((Ack) msg);
             Server.LOGGER.info("Received Ack (ID: " + ((Ack) msg).getId() + ") from Replica (ID: " + replica.getId() + ")");
         }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        ctx.close();
+        Server.LOGGER.severe("Server - Status: Disconnected, Reason: " + cause.getMessage());
+        Server.getInstance().stop();
     }
 }

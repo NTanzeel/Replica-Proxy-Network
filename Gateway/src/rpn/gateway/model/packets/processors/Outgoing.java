@@ -1,12 +1,10 @@
-package rpn.gateway.net.packets.processors;
+package rpn.gateway.model.packets.processors;
 
 import io.netty.buffer.ByteBuf;
-import rpn.gateway.Gateway;
 import rpn.gateway.model.connection.Connection;
 import rpn.gateway.model.connection.ConnectionHandler;
-import rpn.gateway.net.packets.Packet;
+import rpn.gateway.model.packets.Packet;
 
-import java.nio.charset.Charset;
 import java.util.NoSuchElementException;
 
 public class Outgoing extends PacketProcessor {
@@ -30,11 +28,7 @@ public class Outgoing extends PacketProcessor {
 
                 ByteBuf out = client.getChannel().alloc().buffer();
 
-                System.out.println(packet.getPayload().readableBytes());
-
                 out.writeInt(packet.getPayload().readableBytes());
-
-                System.out.println(packet.getPayload().toString(Charset.forName("UTF-8")));
 
                 out.writeBytes(packet.getPayload());
 

@@ -58,19 +58,19 @@ public class Client {
     private void handleUserChoice(Command command) {
         switch (command) {
             case BUY:
-                buyStock(menu.getStockName(), menu.getQuantity());
+                buyStock(menu.getStockName().toUpperCase(), menu.getQuantity());
                 break;
             case SELL:
-                sellStock(menu.getStockName(), menu.getQuantity());
+                sellStock(menu.getStockName().toUpperCase(), menu.getQuantity());
                 break;
             case REFRESH:
                 viewStockList();
                 break;
+            case OWNED:
+                viewOwnedStocks();
+                break;
             case BALANCE:
                 printBalance();
-                break;
-            default:
-                System.out.println("Invalid Option");
                 break;
         }
     }
@@ -80,7 +80,6 @@ public class Client {
      * Covert these into a Hashmap of available stocks
      * Format: name,quantity,price;
      */
-
     public HashMap<String, Stock> getStocksFromMarket() {
         HashMap<String, Stock> stocks = new HashMap<>();
 
@@ -110,15 +109,15 @@ public class Client {
 
     public boolean canBuy(HashMap<String, Stock> stocks, String stock, int amount) {
         if(!stocks.containsKey(stock)) {
-            System.out.println("Invalid stock name, please resubmit");
+            System.out.println("Invalid stock name, please try again.\n");
             return false;
         } else if (stocks.get(stock).getQuantity() < amount || amount <= 0) {
-            System.out.println("Invalid quantity, please resubmit");
+            System.out.println("Invalid quantity, please try again.\n");
             return false;
         } else if (amount * stocks.get(stock).getPrice() > balance) {
-            System.out.println("You cannot afford " + amount + " " + stock + " stocks");
+            System.out.println("You cannot afford " + amount + " " + stock + " stocks.");
             System.out.println("The maximum number you can afford with £" + balance
-                    + " is " + balance/stocks.get(stock).getPrice());
+                    + " is " + balance/stocks.get(stock).getPrice() + "\n");
             return false;
         } else {
             return true;
@@ -153,6 +152,7 @@ public class Client {
             if(response) {
                 updateStock(new Stock(name, quantity, stocks.get(name).getPrice()));
                 updateBalance(quantity * stocks.get(name).getPrice() * -1);
+                System.out.println("Transaction Complete. You now own " + ownedStocks.get(name).getQuantity() + " " + name + " stocks.\n");
             } else {
                 handleResponse("buyStock", responseCode);
             }
@@ -166,10 +166,10 @@ public class Client {
 
     public boolean canSell(String name, int quantity) {
         if(!ownedStocks.containsKey(name)) {
-            System.out.println("You do not own any " + name + " stocks, please resubmit");
+            System.out.println("You do not own any " + name + " stocks, please try again.\n");
             return false;
         } else if (quantity > ownedStocks.get(name).getQuantity() || quantity <= 0) {
-            System.out.println("You do not own " + quantity + " " + name + "stocks, please resubmit");
+            System.out.println("You do not own " + quantity + " " + name + "stocks, please try again.\n");
             return false;
         } else {
             return true;
@@ -182,6 +182,7 @@ public class Client {
                 return;
 
             connection.getOutputStream().writeInt(Command.SELL.getValue());
+            connection.getOutputStream().writeInt(name.length() + 4);
             connection.getOutputStream().writeBytes(name);
             connection.getOutputStream().writeInt(quantity);
 
@@ -194,6 +195,7 @@ public class Client {
             if (response) {
                 updateStock(new Stock(name, quantity * -1, ownedStocks.get(name).getPrice()));
                 updateBalance(quantity * ownedStocks.get(name).getPrice());
+                System.out.println("Transaction Complete. You now own " + ownedStocks.get(name).getQuantity() + " " + name + " stocks.\n");
             } else {
                 handleResponse("sellStock", responseCode);
             }
@@ -205,8 +207,14 @@ public class Client {
     }
 
     public void viewStockList() {
-        HashMap<String, Stock> stocks = getStocksFromMarket();
+        printStocksMap(getStocksFromMarket());
+    }
 
+    public void viewOwnedStocks() {
+        printStocksMap(ownedStocks);
+    }
+
+    private void printStocksMap(HashMap<String, Stock> stocks) {
         System.out.println("|⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻ STOCK  MARKET ⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻|");
         System.out.println("|                                     |");
         System.out.println("|~~~~~~~~~~~~ Stock  List ~~~~~~~~~~~~|");
@@ -215,8 +223,8 @@ public class Client {
         for (Stock stock : stocks.values()) {
             System.out.println(
                     "| " + stock.getName() +
-                    "\t\t\t" + stock.getQuantity() +
-                    "\t\t\t " + stock.getPrice()
+                            "\t\t\t" + stock.getQuantity() +
+                            "\t\t\t " + stock.getPrice()
             );
         }
         System.out.println("|_____________________________________|\n");

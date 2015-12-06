@@ -1,4 +1,4 @@
-package rpn.server.model.listener;
+package rpn.server.net.decoders;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -7,11 +7,11 @@ import rpn.server.model.replica.Replica;
 
 import java.util.List;
 
-public class ListenerAckDecoder extends ByteToMessageDecoder {
+public class ListenerConnectionDecoder extends ByteToMessageDecoder {
 
     private Replica replica;
 
-    public ListenerAckDecoder(Replica replica) {
+    public ListenerConnectionDecoder(Replica replica) {
         this.replica = replica;
     }
 
@@ -20,6 +20,7 @@ public class ListenerAckDecoder extends ByteToMessageDecoder {
         if (in.readableBytes() < 4)
             return;
 
-        out.add(new Ack(in.readInt(), replica.getId()));
+        out.add(in.readInt() == 1);
+        ctx.channel().pipeline().replace("decoder", "decoder", new ListenerAckDecoder(replica));
     }
 }

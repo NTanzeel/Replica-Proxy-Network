@@ -1,9 +1,9 @@
-package rpn.gateway.net.packets.processors;
+package rpn.gateway.model.packets.processors;
 
 import io.netty.buffer.ByteBuf;
 import rpn.gateway.model.connection.Connection;
 import rpn.gateway.model.connection.ConnectionHandler;
-import rpn.gateway.net.packets.Packet;
+import rpn.gateway.model.packets.Packet;
 
 public class Incoming extends PacketProcessor {
 

@@ -1,8 +1,8 @@
-package rpn.gateway.net.packets;
+package rpn.gateway.model.packets;
 
-import rpn.gateway.net.packets.processors.Incoming;
-import rpn.gateway.net.packets.processors.Outgoing;
-import rpn.gateway.net.packets.processors.PacketProcessor;
+import rpn.gateway.model.packets.processors.Incoming;
+import rpn.gateway.model.packets.processors.Outgoing;
+import rpn.gateway.model.packets.processors.PacketProcessor;
 
 public class PacketHandler {
 

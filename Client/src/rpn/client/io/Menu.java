@@ -29,13 +29,22 @@ public class Menu {
             System.out.println("| " + command.getValue() + ") " + command.getDescription());
         }
         System.out.println("|_____________________________________|\n");
-        System.out.print("Option: ");
+        return requestOption();
+    }
 
+    private Command requestOption() {
+        Command option = null;
+        System.out.print("Option: ");
         try {
-            return Command.valueOf(scanner.nextInt());
+            option =  Command.valueOf(scanner.nextInt());
         } catch (Exception e) {
-            return null;
+            scanner.nextLine();
         }
+
+        if (option == null) {
+            System.out.println("Invalid option. Please try again.\n");
+            return requestOption();
+        } else return option;
     }
 
     public String getStockName() {

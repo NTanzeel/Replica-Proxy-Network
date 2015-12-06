@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import rpn.gateway.model.connection.Connection;
-import rpn.gateway.net.packets.Packet;
+import rpn.gateway.model.packets.Packet;
 
 import java.util.List;
 
