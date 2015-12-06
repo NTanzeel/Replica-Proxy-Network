@@ -11,7 +11,9 @@ The protocol is presented as a simple buy and sell system, which in this case us
 ### Commands ###
 
 Gateway : java -cp ./out/production/gateway:./libraries/netty.jar: rpn.gateway.Gateway
+
 Server  : java -cp ./out/production/server:./libraries/netty.jar: rpn.server.Server
+
 Client  : java -cp ./out/production/client:./libraries/netty.jar: rpn.client.Client
 
 ## Authors ##
