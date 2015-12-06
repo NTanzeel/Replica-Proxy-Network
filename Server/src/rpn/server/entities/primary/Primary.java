@@ -1,7 +1,7 @@
-package rpn.server.model.primary;
+package rpn.server.entities.primary;
 
 import io.netty.channel.ChannelPipeline;
-import rpn.server.model.client.Client;
+import rpn.server.entities.client.Client;
 import rpn.server.net.decoders.PrimaryRequestDecoder;
 import rpn.server.net.handlers.PrimaryChannelHandler;
 

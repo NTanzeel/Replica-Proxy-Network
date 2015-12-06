@@ -1,4 +1,4 @@
-package rpn.server.model.listener;
+package rpn.server.entities.listener;
 
 public class Ack {
 

@@ -56,11 +56,11 @@ public class Gateway {
     }
 
     public static void main(String[] args) throws Exception {
-        int port = 43590;
-
-        if (args.length > 0) {
-            port = Integer.parseInt(args[0]);
+        if (args.length < 1) {
+            System.out.println("Please provide the gateway port.");
         }
+
+        int port = Integer.parseInt(args[0]);
 
         new Gateway(port).run();
     }

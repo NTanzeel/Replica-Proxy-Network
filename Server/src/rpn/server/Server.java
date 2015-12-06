@@ -1,10 +1,9 @@
 package rpn.server;
 
-import rpn.server.model.gateway.Gateway;
-import rpn.server.model.primary.Primary;
-import rpn.server.model.listener.Listener;
+import rpn.server.entities.gateway.Gateway;
+import rpn.server.entities.primary.Primary;
+import rpn.server.entities.listener.Listener;
 import rpn.server.service.Service;
-import sun.rmi.runtime.Log;
 
 import java.net.InetAddress;
 import java.util.logging.Logger;

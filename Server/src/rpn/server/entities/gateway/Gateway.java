@@ -1,7 +1,7 @@
-package rpn.server.model.gateway;
+package rpn.server.entities.gateway;
 
 import io.netty.channel.ChannelPipeline;
-import rpn.server.model.client.Client;
+import rpn.server.entities.client.Client;
 import rpn.server.net.decoders.GatewayConnectionDecoder;
 import rpn.server.net.handlers.GatewayChannelHandler;
 

@@ -1,4 +1,4 @@
-package rpn.server.model.listener;
+package rpn.server.entities.listener;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;

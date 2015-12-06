@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import rpn.server.Server;
-import rpn.server.model.primary.Primary;
+import rpn.server.entities.primary.Primary;
 import rpn.server.model.requests.Request;
 import rpn.server.model.requests.RequestHandler;
 

@@ -3,7 +3,7 @@ package rpn.server.model.responses;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import rpn.server.Server;
-import rpn.server.model.listener.Ack;
+import rpn.server.entities.listener.Ack;
 
 import java.util.HashMap;
 import java.util.LinkedList;
