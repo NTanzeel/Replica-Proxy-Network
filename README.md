@@ -1,6 +1,6 @@
 # CS347 Project #
 
-URL: https://github.com/JordWyatt/RPN
+URL: https://github.com/NTanzeel/Replica-Proxy-Network/
 
 ## Description ##
 
